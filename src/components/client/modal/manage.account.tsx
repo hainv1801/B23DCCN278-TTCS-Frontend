@@ -12,25 +12,38 @@ interface IProps {
     onClose: (v: boolean) => void;
 }
 
-const UserBooking = (props: any) => {
+const UserBooking = () => {
     const [listBooking, setListBooking] = useState<IBooking[]>([]);
     const [isFetching, setIsFetching] = useState<boolean>(false);
 
-    useEffect(() => {
-        const init = async () => {
-            setIsFetching(true);
-            const res = await callFetchBookingByUser();
-            if (res && res.data) {
-                // Sắp xếp đơn mới nhất lên đầu nếu Backend chưa sort
-                const sortedData = (res.data.result as IBooking[]).sort((a, b) => {
-                    return dayjs(b.createdAt).valueOf() - dayjs(a.createdAt).valueOf();
-                });
-                setListBooking(sortedData);
+    // State quản lý phân trang
+    const [current, setCurrent] = useState(1);
+    const [pageSize, setPageSize] = useState(5);
+    const [total, setTotal] = useState(0);
+
+    // Hàm fetch được tách riêng để gọi lại mỗi khi user bấm chuyển trang
+    const fetchHistory = async (page: number, size: number) => {
+        setIsFetching(true);
+        // Cần đảm bảo hàm gọi API này đã được sửa ở file api.ts để nhận tham số
+        // Ví dụ: return axios.get(`/api/v1/bookings/by-user?current=${page}&pageSize=${size}`)
+        const res = await callFetchBookingByUser(`current=${page}&pageSize=${size}`);
+        console.log(res.data);
+        if (res && res.data) {
+            // Lưu dữ liệu vào bảng
+            setListBooking(res.data.result);
+
+            // Cập nhật tổng số đơn hàng để hiển thị đúng số lượng trang
+            if (res.data.meta && res.data.meta.total) {
+                setTotal(res.data.meta.total);
             }
-            setIsFetching(false);
         }
-        init();
-    }, [])
+        setIsFetching(false);
+    };
+
+    // Chạy lần đầu khi component được render
+    useEffect(() => {
+        fetchHistory(current, pageSize);
+    }, []);
 
     const columns: ColumnsType<IBooking> = [
         {
@@ -39,26 +52,24 @@ const UserBooking = (props: any) => {
             width: 50,
             align: "center",
             render: (text, record, index) => {
-                return (
-                    <>
-                        {(index + 1)}
-                    </>)
+                // Công thức tính STT tịnh tiến theo trang
+                return (current - 1) * pageSize + index + 1;
             }
         },
         {
             title: 'Tên Tour',
-            dataIndex: ["tourSchedule", "tour", "name"],
+            dataIndex: ["schedule", "tourName"],
+            key: 'tourName',
+            render: (text: string) => <span style={{ fontWeight: 500 }}>{text || 'N/A'}</span>
         },
         {
-            title: 'Ngày Khởi Hành',
-            dataIndex: ["tourSchedule", "departureDate"],
-            render(value) {
-                return (
-                    <strong style={{ color: '#1890ff' }}>
-                        {value ? dayjs(value).format('DD-MM-YYYY') : ""}
-                    </strong>
-                )
-            },
+            title: 'Ngày khởi hành',
+            dataIndex: ['schedule', 'departureDate'],
+            key: 'departureDate',
+            defaultSortOrder: 'descend',
+            render: (date: string) => {
+                return date ? dayjs(date).format('DD/MM/YYYY') : 'N/A';
+            }
         },
         {
             title: 'Tổng Tiền',
@@ -75,28 +86,42 @@ const UserBooking = (props: any) => {
             title: 'Trạng thái Đơn',
             dataIndex: "status",
             render(value) {
-                const color = value === 'CONFIRMED' ? 'green' : value === 'CANCELLED' ? 'red' : 'gold';
-                return <Tag color={color}>{value}</Tag>
+                const color = value === 'CONFIRMED' || value === 'SUCCESS' ? 'green' : value === 'CANCELLED' ? 'red' : 'gold';
+                return <Tag color={color}>{value || 'PENDING'}</Tag>
             },
         },
         {
             title: 'Thanh toán',
             dataIndex: "paymentStatus",
             render(value) {
-                const color = value === 'PAID' ? 'cyan' : 'default';
-                return <Tag color={color}>{value}</Tag>
+                const color = value === 'SUCCESS' || value === 'PAID' ? 'cyan' : value === 'FAILED' ? 'red' : 'default';
+                return <Tag color={color}>{value || 'UNPAID'}</Tag>
             },
         },
         {
-            title: 'Ngày đặt',
-            dataIndex: "createdAt",
-            render(value, record, index) {
-                return (
-                    <>{dayjs(record.createdAt).format('DD-MM-YYYY HH:mm:ss')}</>
-                )
+            title: 'Ngày đặt đơn',
+            dataIndex: 'bookingDate', // Thường backend chuẩn sẽ dùng createdAt cho ngày tạo
+            key: 'bookingDate',
+            render: (date: string) => {
+                return date ? dayjs(date).format('DD/MM/YYYY HH:mm:ss') : 'N/A';
             },
-        }
+        },
     ];
+
+    // Xử lý sự kiện khi bấm nút chuyển trang
+    const handleTableChange = (pagination: any) => {
+        if (pagination && pagination.current) {
+            const newCurrent = pagination.current;
+            const newPageSize = pagination.pageSize;
+
+            // Cập nhật State
+            setCurrent(newCurrent);
+            setPageSize(newPageSize);
+
+            // Gọi lại API với số trang mới
+            fetchHistory(newCurrent, newPageSize);
+        }
+    };
 
     return (
         <div>
@@ -104,7 +129,15 @@ const UserBooking = (props: any) => {
                 columns={columns}
                 dataSource={listBooking}
                 loading={isFetching}
-                pagination={{ pageSize: 5 }} // Thêm phân trang nhỏ gọn cho khách hàng dễ nhìn
+                // Đồng bộ cấu hình phân trang vào Table
+                pagination={{
+                    current: current,
+                    pageSize: pageSize,
+                    total: total,
+                    showSizeChanger: true, // Cho phép thay đổi số dòng / trang
+                    pageSizeOptions: ['5', '10', '20', '50']
+                }}
+                onChange={handleTableChange}
                 rowKey="id"
                 scroll={{ x: true }}
             />
@@ -112,10 +145,11 @@ const UserBooking = (props: any) => {
     )
 }
 
-const UserUpdateInfo = (props: any) => {
+const UserUpdateInfo = () => {
     return (
         <div>
             {/* //todo: Phần cập nhật thông tin cá nhân */}
+            <p>Tính năng đang phát triển...</p>
         </div>
     )
 }
@@ -124,7 +158,7 @@ const ManageAccount = (props: IProps) => {
     const { open, onClose } = props;
 
     const onChange = (key: string) => {
-        // console.log(key);
+        // Có thể thêm logic gọi lại dữ liệu khi đổi tab nếu cần
     };
 
     const items: TabsProps['items'] = [
@@ -141,7 +175,7 @@ const ManageAccount = (props: IProps) => {
         {
             key: 'user-password',
             label: `Thay đổi mật khẩu`,
-            children: `//todo`,
+            children: <p>Tính năng đang phát triển...</p>,
         },
     ];
 

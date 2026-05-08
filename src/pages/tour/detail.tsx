@@ -4,14 +4,19 @@ import { ITour } from "@/types/backend";
 import { callFetchTourById } from "@/config/api";
 import styles from 'styles/client.module.scss';
 import parse from 'html-react-parser';
-import { Col, Divider, Row, Skeleton, Tag } from "antd";
+
+// BỔ SUNG IMPORTS: Card, Typography, Space, Button từ antd
+import { Col, Divider, Row, Skeleton, Tag, Card, Typography, Space, Button } from "antd";
+// BỔ SUNG ICONS
 import { EnvironmentOutlined, HistoryOutlined, WalletOutlined, ClockCircleOutlined } from "@ant-design/icons";
+
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/vi'; // Sử dụng tiếng Việt cho phần thời gian
-import BookingModal from "@/components/client/modal/booking.modal"; // Bạn nhớ đổi tên file apply.modal thành booking.modal nhé
+import BookingModal from "@/components/client/modal/booking.modal";
 
 dayjs.extend(relativeTime);
+const { Title, Text } = Typography; // Destructuring lấy Title và Text để dùng cho đẹp
 
 const ClientTourDetailPage = (props: any) => {
     const [tourDetail, setTourDetail] = useState<ITour | null>(null);
@@ -27,7 +32,7 @@ const ClientTourDetailPage = (props: any) => {
         const init = async () => {
             if (id) {
                 setIsLoading(true)
-                const res = await callFetchTourById(+id); // Ép kiểu id sang number nếu API cần
+                const res = await callFetchTourById(+id);
                 if (res?.data) {
                     setTourDetail(res.data)
                 }
@@ -39,27 +44,22 @@ const ClientTourDetailPage = (props: any) => {
 
     return (
         <div className={`${styles["container"]} ${styles["detail-job-section"]}`}>
-            {isLoading ?
+            {isLoading ? (
                 <Skeleton active />
-                :
-                <Row gutter={[20, 20]}>
-                    {tourDetail && tourDetail.id &&
+            ) : (
+                <Row gutter={[30, 20]}>
+                    {tourDetail && tourDetail.id && (
                         <>
+                            {/* CỘT TRÁI: CHI TIẾT TOUR */}
                             <Col span={24} md={16}>
                                 <div className={styles["header"]}>
                                     {tourDetail.name}
                                 </div>
-                                <div style={{ marginTop: 15 }}>
-                                    <button
-                                        onClick={() => setIsModalOpen(true)}
-                                        className={styles["btn-apply"]}
-                                    >
-                                        Đặt Tour Ngay
-                                    </button>
-                                </div>
+
+                                {/* ĐÃ XÓA NÚT BUTTON ĐẶT TOUR CŨ Ở ĐÂY ĐỂ CHUYỂN SANG CỘT PHẢI */}
                                 <Divider />
 
-                                {/* Phân loại tour (Thay cho Skills) */}
+                                {/* Phân loại tour */}
                                 <div className={styles["skills"]}>
                                     {tourDetail?.categories?.map((item: any, index: number) => {
                                         return (
@@ -70,7 +70,7 @@ const ClientTourDetailPage = (props: any) => {
                                     })}
                                 </div>
 
-                                {/* Giá cơ bản (Thay cho Salary) */}
+                                {/* Giá cơ bản */}
                                 <div className={styles["salary"]} style={{ marginTop: 15 }}>
                                     <WalletOutlined style={{ color: '#d9363e' }} />
                                     <span style={{ color: '#d9363e', fontWeight: 'bold' }}>
@@ -101,25 +101,72 @@ const ClientTourDetailPage = (props: any) => {
                                 </div>
                             </Col>
 
-                            {/* Cột bên phải hiển thị thông tin điểm đến */}
+                            {/* CỘT PHẢI: KHỐI CTA ĐẶT TOUR VÀ ĐIỂM ĐẾN */}
                             <Col span={24} md={8}>
-                                <div className={styles["company"]}>
-                                    <div style={{ width: '100%', overflow: 'hidden', borderRadius: '8px' }}>
-                                        <img
-                                            style={{ width: '100%', objectFit: 'cover' }}
-                                            alt={tourDetail.destination?.name}
-                                            src={`${import.meta.env.VITE_BACKEND_URL}/storage/destination/${tourDetail.destination?.image}`}
-                                        />
+                                {/* Bao bọc bằng div sticky để cuộn theo màn hình */}
+                                <div style={{ position: 'sticky', top: 20 }}>
+
+                                    {/* 1. KHỐI NÚT ĐẶT TOUR NỔI BẬT */}
+                                    <Card
+                                        style={{ borderRadius: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.08)', marginBottom: 20 }}
+                                        bordered={false}
+                                    >
+                                        <Text type="secondary">Giá tham khảo chỉ từ</Text>
+                                        <Title level={2} style={{ color: '#cf1322', marginTop: 4, marginBottom: 16 }}>
+                                            {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(tourDetail.basePrice || 0)}
+                                        </Title>
+
+                                        <Space direction="vertical" style={{ width: '100%', marginBottom: 20 }}>
+                                            <Space>
+                                                <ClockCircleOutlined style={{ color: '#1677ff' }} />
+                                                <Text>Thời gian: <Text strong>{tourDetail.duration} ngày</Text></Text>
+                                            </Space>
+                                            <Space>
+                                                <EnvironmentOutlined style={{ color: '#1677ff' }} />
+                                                <Text>Khám phá: <Text strong>{tourDetail.destination?.name}</Text></Text>
+                                            </Space>
+                                        </Space>
+
+                                        <Button
+                                            type="primary"
+                                            size="large"
+                                            block
+                                            onClick={() => setIsModalOpen(true)}
+                                            style={{
+                                                height: 50,
+                                                fontSize: 18,
+                                                fontWeight: 'bold',
+                                                backgroundColor: '#ff4d4f',
+                                                borderColor: '#ff4d4f'
+                                            }}
+                                        >
+                                            ĐẶT TOUR NGAY
+                                        </Button>
+                                    </Card>
+
+                                    {/* 2. KHỐI ẢNH ĐIỂM ĐẾN */}
+                                    <div className={styles["company"]} style={{ padding: 15, backgroundColor: '#fff', borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+                                        <div style={{ width: '100%', overflow: 'hidden', borderRadius: '8px' }}>
+                                            <img
+                                                style={{ width: '100%', objectFit: 'cover' }}
+                                                alt={tourDetail.destination?.name}
+                                                src={`${import.meta.env.VITE_BACKEND_URL}/storage/destination/${tourDetail.destination?.image}`}
+                                            />
+                                        </div>
+                                        <div style={{ marginTop: '15px', fontWeight: 'bold', textAlign: 'center', fontSize: '18px' }}>
+                                            {tourDetail.destination?.name}
+                                        </div>
+                                        <div style={{ textAlign: 'center', color: '#888', marginTop: 5 }}>
+                                            {tourDetail.destination?.location}
+                                        </div>
                                     </div>
-                                    <div style={{ marginTop: '15px', fontWeight: 'bold', textAlign: 'center', fontSize: '18px' }}>
-                                        {tourDetail.destination?.name}
-                                    </div>
+
                                 </div>
                             </Col>
                         </>
-                    }
+                    )}
                 </Row>
-            }
+            )}
 
             {/* Modal đặt tour */}
             <BookingModal

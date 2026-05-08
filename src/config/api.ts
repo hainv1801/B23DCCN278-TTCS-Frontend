@@ -113,7 +113,7 @@ export const callFetchUser = (query: string) => {
 }
 
 /**
- * 
+ *
 Module Tour
  */
 export const callCreateTour = (tour: ITour) => {
@@ -180,8 +180,8 @@ export const callFetchBookingById = (id: string) => {
     return axios.get<IBackendRes<IBooking>>(`/api/v1/bookings/${id}`);
 }
 
-export const callFetchBookingByUser = () => {
-    return axios.post<IBackendRes<IModelPaginate<IBooking>>>(`/api/v1/bookings/by-user`);
+export const callFetchBookingByUser = (query: string) => {
+    return axios.post<IBackendRes<IModelPaginate<IBooking>>>(`/api/v1/bookings/by-user?${query}`);
 }
 
 /**
@@ -231,3 +231,13 @@ export const callFetchRole = (query: string) => {
 export const callFetchRoleById = (id: string) => {
     return axios.get<IBackendRes<IRole>>(`/api/v1/roles/${id}`);
 }
+
+
+// Gọi API tạo URL thanh toán VNPay (Giả định bạn đã làm theo hướng dẫn Backend lúc trước)
+export const callCreatePaymentUrl = (data: any) => {
+    return axios.post(`/api/v1/payments/create-payment-url`, data);
+};
+export const callVerifyVNPay = (queryString: string) => {
+    // Truyền toàn bộ query parameter xuống backend để verify
+    return axios.get(`/api/v1/payments/vnpay-return?${queryString}`);
+};

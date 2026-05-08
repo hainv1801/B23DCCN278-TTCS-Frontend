@@ -27,18 +27,19 @@ const ModalUser = (props: IProps) => {
 
     useEffect(() => {
         if (dataInit?.id) {
+            console.log("User", dataInit);
             // Nếu có dữ liệu role, set vào state để DebounceSelect hiển thị đúng label ban đầu
-            if (dataInit.role) {
+            if (dataInit.roleUser) {
                 setRoles([{
-                    label: dataInit.role.name,
-                    value: dataInit.role.id,
+                    label: dataInit.roleUser.name,
+                    value: dataInit.roleUser.id,
                 }]);
             }
 
             form.setFieldsValue({
                 ...dataInit,
                 // Chuyển đổi về dạng object {label, value} để phù hợp với Select
-                role: dataInit.role ? { label: dataInit.role.name, value: dataInit.role.id } : undefined,
+                role: dataInit.roleUser ? { label: dataInit.roleUser.name, value: dataInit.roleUser.id } : undefined,
             });
         }
     }, [dataInit, form]);
@@ -64,8 +65,6 @@ const ModalUser = (props: IProps) => {
             gender,
             address,
             role: { id: roleId },
-            // Nếu dự án của bạn không dùng company thì bỏ qua, 
-            // nếu dùng thì phải mở comment ở phần Form và thêm vào đây tương tự role
         }
 
         if (dataInit?.id) {

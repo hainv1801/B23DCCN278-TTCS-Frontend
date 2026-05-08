@@ -137,6 +137,7 @@ const ModalPermission = (props: IProps) => {
                                 COMPANIES: 'COMPANIES',
                                 FILES: 'FILES',
                                 JOBS: 'JOBS',
+                                PAYMENTS: 'PAYMENTS',
                                 PERMISSIONS: 'PERMISSIONS',
                                 RESUMES: 'RESUMES',
                                 ROLES: 'ROLES',

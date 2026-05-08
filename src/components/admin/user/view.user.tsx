@@ -29,7 +29,7 @@ const ViewDetailUser = (props: IProps) => {
                     <Descriptions.Item label="Tuổi">{dataInit?.age}</Descriptions.Item>
 
                     <Descriptions.Item label="Vai trò" >
-                        <Badge status="processing" text={<>{dataInit?.role}</>} />
+                        <Badge status="processing" text={<>{dataInit?.roleUser?.name}</>} />
                     </Descriptions.Item>
                     <Descriptions.Item label="Địa chỉ" >{dataInit?.address}</Descriptions.Item>
 

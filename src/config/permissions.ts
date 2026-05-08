@@ -29,6 +29,14 @@ export const ALL_PERMISSIONS = {
         UPDATE: { method: "PUT", apiPath: '/api/v1/bookings', module: "BOOKINGS" },
         DELETE: { method: "DELETE", apiPath: '/api/v1/bookings/{id}', module: "BOOKINGS" },
     },
+    PAYMENTS: {
+        CREATE: {method: "POST", apiPath: '/api/v1/payments', module:"PAYMENTS"},
+        GET_PAGINATE: { method: "GET", apiPath: '/api/v1/payments', module: "PAYMENTS" },
+        UPDATE: { method: "PUT", apiPath: '/api/v1/payments', module: "PAYMENTS" },
+        DELETE: { method: "DELETE", apiPath: '/api/v1/payments/{id}', module: "PAYMENTS" },
+        CREATE_URL: {method: "POST", apiPath: '/api/v1/payments/create-payment-url', module:"PAYMENTS"},
+        GET_RETURN: { method: "GET", apiPath: '/api/v1/payments/vnpay-return', module: "PAYMENTS" }
+    },
     ROLES: {
         GET_PAGINATE: { method: "GET", apiPath: '/api/v1/roles', module: "ROLES" },
         CREATE: { method: "POST", apiPath: '/api/v1/roles', module: "ROLES" },

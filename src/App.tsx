@@ -30,6 +30,7 @@ import ClientTourDetailPage from './pages/tour/detail';
 import ClientDestinationPage from './pages/destination';
 import ClientDestinationDetailPage from './pages/destination/detail';
 import TourTabs from './pages/admin/tour/tour.tabs';
+import PaymentReturnPage from './pages/payment/PaymentReturnPage';
 // import CategoryPage from './pages/admin/category';
 import ViewUpsertTourSchedule from './components/admin/tour/upsert.tour.schedule';
 const LayoutClient = () => {
@@ -79,7 +80,8 @@ export default function App() {
         { path: "tour", element: <ClientTourPage /> },
         { path: "tour/:id", element: <ClientTourDetailPage /> },
         { path: "destination", element: <ClientDestinationPage /> },
-        { path: "destination/:id", element: <ClientDestinationDetailPage /> }
+        { path: "destination/:id", element: <ClientDestinationDetailPage /> },
+        { path: "payments/vnpay-return", element: <PaymentReturnPage /> }
       ],
     },
 
@@ -152,7 +154,6 @@ export default function App() {
         }
       ],
     },
-
 
     {
       path: "/login",

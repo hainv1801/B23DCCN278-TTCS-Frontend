@@ -45,15 +45,11 @@ export interface IUser {
     age: number;
     gender: string;
     address: string;
-    role?: {
+    roleUser?: {
         id: string;
         name: string;
     }
 
-    company?: {
-        id: string;
-        name: string;
-    }
     createdBy?: string;
     isDeleted?: boolean;
     deletedAt?: boolean | null;
@@ -120,6 +116,7 @@ export interface ITour {
     description: string;
     destination?: IDestination
     categories?: ICategory[];
+    tourSchedules?: ITourSchedule[];
     createdAt?: string;
     updatedAt?: string; 
     createdBy?: string;
