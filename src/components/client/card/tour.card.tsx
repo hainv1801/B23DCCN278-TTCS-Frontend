@@ -1,19 +1,18 @@
 import { callFetchTour } from '@/config/api';
 import { convertSlug } from '@/config/utils';
 import { ITour } from '@/types/backend';
-import { EnvironmentOutlined, WalletOutlined, ClockCircleOutlined } from '@ant-design/icons';
-import { Card, Col, Empty, Pagination, Row, Spin } from 'antd';
+import { EnvironmentOutlined, ClockCircleOutlined, FireOutlined } from '@ant-design/icons';
+import { Col, Empty, Pagination, Row, Spin } from 'antd';
 import { useState, useEffect } from 'react';
-import { isMobile } from 'react-device-detect';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import styles from 'styles/client.module.scss';
 import { sfIn } from "spring-filter-query-builder";
+import { useTranslation } from 'react-i18next';
 
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import 'dayjs/locale/vi'; // Import thêm locale tiếng Việt nếu muốn hiển thị "vài giây trước", "1 ngày trước"
+import 'dayjs/locale/vi';
 dayjs.extend(relativeTime);
-
 
 interface IProps {
     showPagination?: boolean;
@@ -21,7 +20,7 @@ interface IProps {
 
 const TourCard = (props: IProps) => {
     const { showPagination = false } = props;
-
+    const { t } = useTranslation();
     const [displayTour, setDisplayTour] = useState<ITour[] | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -48,7 +47,6 @@ const TourCard = (props: IProps) => {
             query += `&${sortQuery}`;
         }
 
-        // Xử lý bộ lọc tìm kiếm từ thanh URL (nếu có)
         const queryDestination = searchParams.get("destination");
         const queryCategories = searchParams.get("categories");
 
@@ -91,83 +89,96 @@ const TourCard = (props: IProps) => {
     }
 
     return (
-        <div className={`${styles["card-tour-section"]}`}>
-            {/* Giữ nguyên class CSS cũ để không vỡ layout */}
-            <div className={`${styles["tour-content"]}`}>
-                <Spin spinning={isLoading} tip="Loading...">
-                    <Row gutter={[20, 20]}>
+        <div className={styles["section-container"]}>
+            <Spin spinning={isLoading} tip={t('common.loading', 'Loading...')}>
+                <Row gutter={[24, 24]}>
+                    <Col span={24}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                            {/* Áp dụng class section-heading cho tiêu đề */}
+                            <h2 className={styles["section-heading"]}>{t('tour.title')}</h2>
+
+                            {!showPagination &&
+                                <Link to="/tour" style={{ color: '#1890ff', fontWeight: 600 }}>
+                                    {t('tour.view', 'Xem tất cả')} &rarr;
+                                </Link>
+                            }
+                        </div>
+                    </Col>
+
+                    {displayTour?.map(item => {
+                        return (
+                            <Col span={24} md={12} lg={8} key={item.id}>
+                                <div
+                                    className={styles['tour-card']}
+                                    onClick={() => handleViewDetailTour(item)}
+                                >
+                                    {/* 1. Phần hình ảnh */}
+                                    <div className={styles['tour-image']}>
+                                        <img
+                                            alt={item.name}
+                                            src={`${import.meta.env.VITE_BACKEND_URL}/storage/destination/${item?.destination?.image}`}
+                                            onError={(e) => {
+                                                e.currentTarget.src = '/fallback-image.jpg';
+                                            }}
+                                        />
+                                        {/* Tag HOT nổi bật góc phải */}
+                                        <span className={styles['tour-badge']}>
+                                            <FireOutlined /> HOT
+                                        </span>
+                                    </div>
+
+                                    {/* 2. Phần nội dung */}
+                                    <div className={styles['tour-content']}>
+                                        <h3 className={styles['tour-title']}>{item.name}</h3>
+
+                                        <div className={styles['tour-info']}>
+                                            <EnvironmentOutlined style={{ color: '#58aaab' }} />
+                                            <span>{item?.destination?.name} ({item?.destination?.location})</span>
+                                        </div>
+
+                                        <div className={styles['tour-info']}>
+                                            <ClockCircleOutlined style={{ color: '#1890ff' }} />
+                                            <span>{item.duration} Ngày</span>
+                                        </div>
+
+                                        {/* 3. Phần Footer (Giá tiền và Thời gian cập nhật) */}
+                                        <div className={styles['tour-footer']}>
+                                            <span className={styles['tour-price']}>
+                                                {(item.basePrice + "")?.replace(/\B(?=(\d{3})+(?!\d))/g, ',')} đ
+                                            </span>
+                                            <span style={{ color: '#888', fontSize: '13px' }}>
+                                                {item.updatedAt ? dayjs(item.updatedAt).locale('vi').fromNow() : dayjs(item.createdAt).locale('vi').fromNow()}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Col>
+                        )
+                    })}
+
+                    {(!displayTour || displayTour && displayTour.length === 0)
+                        && !isLoading &&
                         <Col span={24}>
-                            <div className={isMobile ? styles["dflex-mobile"] : styles["dflex-pc"]}>
-                                <span className={styles["title"]}>Tour Du Lịch Mới Nhất</span>
-                                {!showPagination &&
-                                    <Link to="/tour">Xem tất cả</Link>
-                                }
+                            <div className={styles["empty"]}>
+                                <Empty description={t('tour.empty')} />
                             </div>
                         </Col>
+                    }
+                </Row>
 
-                        {displayTour?.map(item => {
-                            return (
-                                <Col span={24} md={12} key={item.id}>
-                                    <Card size="small" title={null} hoverable
-                                        onClick={() => handleViewDetailTour(item)}
-                                    >
-                                        <div className={styles["card-tour-content"]}>
-                                            <div className={styles["card-tour-left"]}>
-                                                <img
-                                                    style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "4px" }}
-                                                    alt={item.name}
-                                                    src={`${import.meta.env.VITE_BACKEND_URL}/storage/destination/${item?.destination?.image}`}
-                                                />
-                                            </div>
-                                            <div className={styles["card-tour-right"]}>
-                                                <div className={styles["tour-title"]}>{item.name}</div>
-
-                                                <div className={styles["tour-location"]}>
-                                                    <EnvironmentOutlined style={{ color: '#58aaab' }} />
-                                                    &nbsp;{item?.destination?.name} ({item?.destination?.location})
-                                                </div>
-
-                                                <div style={{ margin: "4px 0" }}>
-                                                    <ClockCircleOutlined style={{ color: '#1890ff' }} />
-                                                    &nbsp;{item.duration} Ngày
-                                                </div>
-
-                                                <div>
-                                                    <WalletOutlined style={{ color: '#d9363e' }} />
-                                                    &nbsp;<strong style={{ color: '#d9363e' }}>{(item.basePrice + "")?.replace(/\B(?=(\d{3})+(?!\d))/g, ',')} VNĐ</strong>
-                                                </div>
-
-                                                <div className={styles["tour-updatedAt"]}>
-                                                    {item.updatedAt ? dayjs(item.updatedAt).locale('vi').fromNow() : dayjs(item.createdAt).locale('vi').fromNow()}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </Card>
-                                </Col>
-                            )
-                        })}
-
-                        {(!displayTour || displayTour && displayTour.length === 0)
-                            && !isLoading &&
-                            <div className={styles["empty"]}>
-                                <Empty description="Chưa có tour nào" />
-                            </div>
-                        }
+                {showPagination && <>
+                    <div style={{ marginTop: 40 }}></div>
+                    <Row style={{ display: "flex", justifyContent: "center" }}>
+                        <Pagination
+                            current={current}
+                            total={total}
+                            pageSize={pageSize}
+                            responsive
+                            onChange={(p: number, s: number) => handleOnchangePage({ current: p, pageSize: s })}
+                        />
                     </Row>
-                    {showPagination && <>
-                        <div style={{ marginTop: 30 }}></div>
-                        <Row style={{ display: "flex", justifyContent: "center" }}>
-                            <Pagination
-                                current={current}
-                                total={total}
-                                pageSize={pageSize}
-                                responsive
-                                onChange={(p: number, s: number) => handleOnchangePage({ current: p, pageSize: s })}
-                            />
-                        </Row>
-                    </>}
-                </Spin>
-            </div>
+                </>}
+            </Spin>
         </div>
     )
 }

@@ -1,11 +1,13 @@
 import { callFetchDestination } from '@/config/api';
 import { convertSlug } from '@/config/utils';
 import { IDestination } from '@/types/backend';
-import { Card, Col, Divider, Empty, Pagination, Row, Spin } from 'antd';
+import { Col, Empty, Pagination, Row, Spin } from 'antd';
 import { useState, useEffect } from 'react';
 import { isMobile } from 'react-device-detect';
 import { Link, useNavigate } from 'react-router-dom';
-import styles from 'styles/client.module.scss'; // Lưu ý cập nhật CSS trong file này nếu cần
+import styles from 'styles/client.module.scss';
+import { useTranslation } from 'react-i18next';
+import { EnvironmentOutlined } from '@ant-design/icons';
 
 interface IProps {
     showPagination?: boolean;
@@ -13,7 +15,7 @@ interface IProps {
 
 const DestinationCard = (props: IProps) => {
     const { showPagination = false } = props;
-
+    const { t } = useTranslation();
     const [displayDestination, setDisplayDestination] = useState<IDestination[] | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -64,69 +66,75 @@ const DestinationCard = (props: IProps) => {
     }
 
     return (
-        <div className={`${styles["company-section"]}`}>
-            {/* Nếu bạn đổi tên class trong file scss thì nhớ update lại tên class ở đây nhé */}
-            <div className={styles["company-content"]}>
-                <Spin spinning={isLoading} tip="Loading...">
-                    <Row gutter={[20, 20]}>
+        <div className={styles["section-container"]}>
+            <Spin spinning={isLoading} tip={t('common.loading', 'Loading...')}>
+                <Row gutter={[20, 20]}>
+                    <Col span={24}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                            {/* Áp dụng class section-heading cho tiêu đề */}
+                            <h2 className={styles["section-heading"]}>
+                                {t('destination.title', 'Địa Điểm Hot')}
+                            </h2>
+                            {!showPagination &&
+                                <Link to="/destination" style={{ color: '#1890ff', fontWeight: 600 }}>
+                                    {t('destination.view', 'Xem tất cả')} &rarr;
+                                </Link>
+                            }
+                        </div>
+                    </Col>
+
+                    {displayDestination?.map(item => {
+                        return (
+                            <Col span={24} md={6} key={item.id}>
+                                {/* Giao diện Card Địa điểm mới */}
+                                <div
+                                    className={styles['destination-card']}
+                                    onClick={() => handleViewDetailDestination(item)}
+                                >
+                                    <img
+                                        className={styles['dest-image']}
+                                        alt={item.name}
+                                        src={`${import.meta.env.VITE_BACKEND_URL}/storage/destination/${item?.image}`}
+                                        onError={(e) => {
+                                            // Fallback ảnh lỗi nếu không tải được
+                                            e.currentTarget.src = '/fallback-image.jpg';
+                                        }}
+                                    />
+                                    <div className={styles['dest-overlay']}>
+                                        <h3 className={styles['dest-title']}>{item.name}</h3>
+                                        <span className={styles['dest-count']}>
+                                            <EnvironmentOutlined style={{ marginRight: 5 }} />
+                                            {item.location}
+                                        </span>
+                                    </div>
+                                </div>
+                            </Col>
+                        )
+                    })}
+
+                    {(!displayDestination || displayDestination && displayDestination.length === 0)
+                        && !isLoading &&
                         <Col span={24}>
-                            <div className={isMobile ? styles["dflex-mobile"] : styles["dflex-pc"]}>
-                                <span className={styles["title"]}>Các Điểm Đến Phổ Biến</span>
-                                {!showPagination &&
-                                    <Link to="/destination">Xem tất cả</Link>
-                                }
+                            <div className={styles["empty"]}>
+                                <Empty description={t('destination.empty', 'Chưa có dữ liệu địa điểm')} />
                             </div>
                         </Col>
+                    }
+                </Row>
 
-                        {displayDestination?.map(item => {
-                            return (
-                                <Col span={24} md={6} key={item.id}>
-                                    <Card
-                                        onClick={() => handleViewDetailDestination(item)}
-                                        style={{ height: 350 }}
-                                        hoverable
-                                        cover={
-                                            <div className={styles["card-customize"]} >
-                                                <img
-                                                    style={{ width: "100%", height: "200px", objectFit: "cover" }}
-                                                    alt={item.name}
-                                                    // Cập nhật thư mục lấy ảnh thành "destination" và biến là item.image
-                                                    src={`${import.meta.env.VITE_BACKEND_URL}/storage/destination/${item?.image}`}
-                                                />
-                                            </div>
-                                        }
-                                    >
-                                        <Divider style={{ margin: "12px 0" }} />
-                                        <h3 style={{ textAlign: "center", fontSize: "16px", color: "#333" }}>{item.name}</h3>
-                                        <p style={{ textAlign: "center", color: "#888", fontSize: "13px" }}>
-                                            {item.location}
-                                        </p>
-                                    </Card>
-                                </Col>
-                            )
-                        })}
-
-                        {(!displayDestination || displayDestination && displayDestination.length === 0)
-                            && !isLoading &&
-                            <div className={styles["empty"]}>
-                                <Empty description="Chưa có điểm đến nào" />
-                            </div>
-                        }
+                {showPagination && <>
+                    <div style={{ marginTop: 30 }}></div>
+                    <Row style={{ display: "flex", justifyContent: "center" }}>
+                        <Pagination
+                            current={current}
+                            total={total}
+                            pageSize={pageSize}
+                            responsive
+                            onChange={(p: number, s: number) => handleOnchangePage({ current: p, pageSize: s })}
+                        />
                     </Row>
-                    {showPagination && <>
-                        <div style={{ marginTop: 30 }}></div>
-                        <Row style={{ display: "flex", justifyContent: "center" }}>
-                            <Pagination
-                                current={current}
-                                total={total}
-                                pageSize={pageSize}
-                                responsive
-                                onChange={(p: number, s: number) => handleOnchangePage({ current: p, pageSize: s })}
-                            />
-                        </Row>
-                    </>}
-                </Spin>
-            </div>
+                </>}
+            </Spin>
         </div>
     )
 }

@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { callCreateBooking, callCreatePaymentUrl } from '@/config/api';
 import { ITour } from '@/types/backend';
 import dayjs from 'dayjs';
-
+import { useTranslation } from 'react-i18next';
 const { Text, Title } = Typography;
 const { Option } = Select;
 const { TextArea } = Input;
@@ -21,7 +21,7 @@ const BookingModal = (props: BookingModalProps) => {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
-
+    const { t } = useTranslation();
     // 1. Lọc các lịch trình hợp lệ
     const activeSchedules = useMemo(() => {
         if (!tourDetail?.tourSchedules) return [];
@@ -81,7 +81,7 @@ const BookingModal = (props: BookingModalProps) => {
                 const finalPrice = resBooking.data.totalPrice || totalPrice;
 
                 if (values.paymentMethod === 'VNPAY') {
-                    message.loading('Đang chuyển hướng đến cổng thanh toán...', 2);
+                    message.loading(t('booking.message'), 2);
                     const paymentReq = { bookingId, totalPrice: finalPrice };
                     const resPayment = await callCreatePaymentUrl(paymentReq);
 
@@ -91,7 +91,7 @@ const BookingModal = (props: BookingModalProps) => {
                         message.error('Không thể khởi tạo cổng thanh toán!');
                     }
                 } else {
-                    message.success('Đặt tour thành công!');
+                    message.success(t('booking.successMessage'));
                     setIsModalOpen(false);
                     form.resetFields();
                     navigate('/');
@@ -109,11 +109,11 @@ const BookingModal = (props: BookingModalProps) => {
 
     return (
         <Modal
-            title={<Title level={4} style={{ margin: 0, textAlign: 'center' }}>Xác Nhận Đặt Tour</Title>}
+            title={<Title level={4} style={{ margin: 0, textAlign: 'center' }}>{t('booking.title')}</Title>}
             open={isModalOpen}
             onCancel={handleClose}
             footer={null}
-            width={650} // Nới rộng form ra một chút cho cân đối
+            width={650}
             centered
             maskClosable={false}
         >
@@ -121,9 +121,9 @@ const BookingModal = (props: BookingModalProps) => {
 
                 {/* 1. THÔNG TIN TOUR (Dùng nền nhạt để tách biệt) */}
                 <Card size="small" style={{ backgroundColor: '#f0f2f5', marginBottom: 20, borderRadius: 8, border: 'none' }}>
-                    <Text strong style={{ fontSize: 16, color: '#1677ff' }}>{tourDetail?.name}</Text>
+                    <Text strong style={{ fontSize: 18, color: '#1677ff' }}>{tourDetail?.name}</Text>
                     <br />
-                    <Text type="secondary" style={{ fontSize: 13 }}>Vui lòng chọn đúng lịch trình và hoàn tất thông tin đặt chỗ phía dưới.</Text>
+                    <Text type="secondary" style={{ fontSize: 13 }}>{t('booking.notice')}</Text>
                 </Card>
 
                 {/* 2. CHỌN NGÀY VÀ SỐ LƯỢNG KẾT HỢP */}
@@ -131,17 +131,17 @@ const BookingModal = (props: BookingModalProps) => {
                     <Col span={24}>
                         <Form.Item
                             name="tourScheduleId"
-                            label={<Text strong>Ngày khởi hành</Text>}
-                            rules={[{ required: true, message: 'Vui lòng chọn ngày đi!' }]}
+                            label={<Text strong>{t('booking.departureTime')}</Text>}
+                            rules={[{ required: true, message: t('booking.timeMessage') }]}
                         >
                             <Select
-                                placeholder="Chọn ngày bạn muốn đi"
+                                placeholder={t('booking.timeMessage')}
                                 size="large"
                                 suffixIcon={<CalendarOutlined />}
                             >
                                 {activeSchedules.map(s => (
                                     <Option key={s.id} value={s.id}>
-                                        {dayjs(s.departureDate).format('DD/MM/YYYY')} - Còn trống {s.capacity - s.bookedSeats} chỗ
+                                        {dayjs(s.departureDate).format('DD/MM/YYYY')} - {t('booking.available')} {s.capacity - s.bookedSeats} {t('booking.slot')}
                                     </Option>
                                 ))}
                             </Select>
@@ -149,7 +149,7 @@ const BookingModal = (props: BookingModalProps) => {
                     </Col>
 
                     <Col span={12}>
-                        <Form.Item name="totalAdults" label={<Text strong>Người lớn</Text>}>
+                        <Form.Item name="totalAdults" label={<Text strong>{t('booking.adult')}</Text>}>
                             <InputNumber
                                 min={1}
                                 max={remainingSeats}
@@ -160,7 +160,7 @@ const BookingModal = (props: BookingModalProps) => {
                         </Form.Item>
                     </Col>
                     <Col span={12}>
-                        <Form.Item name="totalChildren" label={<Text strong>Trẻ em (Dưới 12 tuổi)</Text>}>
+                        <Form.Item name="totalChildren" label={<Text strong>{t('booking.child')}</Text>}>
                             <InputNumber
                                 min={0}
                                 max={remainingSeats - totalAdults}
@@ -173,10 +173,10 @@ const BookingModal = (props: BookingModalProps) => {
                 </Row>
 
                 {/* 3. GHI CHÚ */}
-                <Form.Item name="note" label={<Text strong>Ghi chú thêm (Tùy chọn)</Text>} style={{ marginBottom: 16 }}>
+                <Form.Item name="note" label={<Text strong>{t('booking.note')}</Text>} style={{ marginBottom: 16 }}>
                     <TextArea
-                        rows={2} // Giảm xuống 2 dòng cho đỡ chiếm diện tích
-                        placeholder="Yêu cầu ăn chay, đón tại điểm khác..."
+                        rows={2}
+                        placeholder={t('booking.notePlaceHolder')}
                         maxLength={255}
                     />
                 </Form.Item>
@@ -184,7 +184,7 @@ const BookingModal = (props: BookingModalProps) => {
                 <Divider style={{ margin: '16px 0' }} />
 
                 {/* 4. PHƯƠNG THỨC THANH TOÁN (Xếp ngang cho cân đối) */}
-                <Title level={5} style={{ marginBottom: 12 }}>Phương thức thanh toán</Title>
+                <Title level={5} style={{ marginBottom: 12 }}>{t('booking.method')}</Title>
                 <Form.Item name="paymentMethod">
                     <Radio.Group style={{ width: '100%' }}>
                         <Row gutter={16}>
@@ -195,8 +195,8 @@ const BookingModal = (props: BookingModalProps) => {
                                 >
                                     <CreditCardOutlined style={{ fontSize: 24, color: '#1677ff', marginBottom: 8 }} />
                                     <div style={{ lineHeight: '1.2' }}>
-                                        <Text strong>Thanh toán VNPay</Text><br />
-                                        <Text type="secondary" style={{ fontSize: 12 }}>Hỗ trợ thẻ ATM, Visa, QR</Text>
+                                        <Text strong>VNPay</Text><br />
+                                        <Text type="secondary" style={{ fontSize: 12 }}>{t('booking.support')}</Text>
                                     </div>
                                 </Radio.Button>
                             </Col>
@@ -207,8 +207,8 @@ const BookingModal = (props: BookingModalProps) => {
                                 >
                                     <MoneyCollectOutlined style={{ fontSize: 24, color: '#52c41a', marginBottom: 8 }} />
                                     <div style={{ lineHeight: '1.2' }}>
-                                        <Text strong>Tiền mặt / Chuyển khoản</Text><br />
-                                        <Text type="secondary" style={{ fontSize: 12 }}>Thanh toán sau với NV</Text>
+                                        <Text strong>{t('booking.cash')}</Text><br />
+                                        <Text type="secondary" style={{ fontSize: 12 }}>{t('booking.cashNote')}</Text>
                                     </div>
                                 </Radio.Button>
                             </Col>
@@ -220,7 +220,7 @@ const BookingModal = (props: BookingModalProps) => {
                 <div style={{ backgroundColor: '#fffbe6', padding: '16px', borderRadius: 8, border: '1px solid #ffe58f', marginTop: 24 }}>
                     <Row align="middle" justify="space-between">
                         <Col>
-                            <Text type="secondary" style={{ fontSize: 14 }}>Tổng thanh toán:</Text>
+                            <Text type="secondary" style={{ fontSize: 14 }}>{t('booking.total')}</Text>
                             <br />
                             <Text strong style={{ fontSize: 26, color: '#cf1322' }}>
                                 {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalPrice)}
@@ -228,9 +228,9 @@ const BookingModal = (props: BookingModalProps) => {
                         </Col>
                         <Col>
                             <Space>
-                                <Button onClick={handleClose} size="large" style={{ borderRadius: 6 }}>Hủy</Button>
+                                <Button onClick={handleClose} size="large" style={{ borderRadius: 6 }}>{t('booking.cancel')}</Button>
                                 <Button type="primary" htmlType="submit" size="large" loading={loading} disabled={!currentSchedule} style={{ backgroundColor: '#ff4d4f', borderColor: '#ff4d4f', borderRadius: 6, fontWeight: 'bold' }}>
-                                    Xác nhận Đặt Tour
+                                    {t('booking.confirm')}
                                 </Button>
                             </Space>
                         </Col>

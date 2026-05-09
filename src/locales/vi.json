@@ -1,0 +1,66 @@
+{
+  "header": {
+    "home": "Trang Chủ",
+    "tour": "Tour Du Lịch",
+    "destination": "Địa Điểm Hot",
+    "login": "Đăng nhập",
+    "register": "Đăng ký",
+    "welcome": "Xin chào"
+  },
+  "booking": {
+    "history": "Lịch sử đặt tour",
+    "status": "Trạng thái",
+    "payment": "Thanh toán",
+    "success": "Thành công",
+    "failed": "Thất bại", 
+    "message": "Đang chuyển hướng đến cổng thanh toán...",
+    "successMessage": "Đặt tour thành công!",
+    "title": "Xác nhận đặt tour",
+    "notice": "Vui lòng chọn đúng lịch trình và hoàn tất thông tin đặt chỗ phía dưới.",
+    "departureTime": "Ngày khởi hành",
+    "timeMessage": "Chọn ngày bạn muốn đi",
+    "available": "Còn trống",
+    "slot": "chỗ",
+    "adult": "Người lớn", 
+    "child": "Trẻ em (Dưới 12 tuổi)",
+    "note": "Ghi chú (Tùy chọn)",
+    "notePlaceHolder": "Yêu cầu ăn chay, đón tại điểm khác...",
+    "method": "Phương thức thanh toán",
+    "support": "Hỗ trợ thẻ ATM, Visa, QR",
+    "cash": "Tiền mặt",
+    "cashNote": "Thanh toán sau với nhân viên",
+    "total": "Tổng thanh toán :",
+    "cancel": "Hủy",
+    "confirm": "Xác nhận đặt tour"
+  },
+  "search": {
+    "heading": "Tour du lịch vip nhất quả đất",
+    "categoryPlaceholder": "Tìm theo danh mục...",
+    "locationPlaceholder": "Địa điểm...",
+    "button": "Tìm kiếm",
+    "errorTitle": "Có lỗi xảy ra",
+    "errorDesc": "Vui lòng chọn tiêu chí để tìm kiếm"
+  },
+  "destination":{
+    "title": "Các Điểm Đến Phổ Biến",
+    "view": "Xem tất cả",
+    "empty": "Chưa có điểm đến nào"
+  },
+  "tour":{
+    "title": "Tour du lịch mới nhất",
+    "view":"Xem tất cả",
+    "empty": "Chưa có tour nào",
+    "days": "Ngày",
+    "duration": "Thời gian",
+    "destination": "Điểm đến",
+    "transportation": "Phương tiện",
+    "car": "Xe du lịch cao cấp", 
+    "program": "Lịch trình", 
+    "startingPrice": "Giá tham khảo chỉ từ",
+    "booking": "Đặt tour ngay!!!",
+    "tax": "Đã bao gồm thuế và phí",
+    "confirm": "Xác nhận ngay lập tức",
+    "support": "Hỗ trợ 24/7",
+    "payment": "Thanh toán an toàn, bảo mật"
+  }
+}

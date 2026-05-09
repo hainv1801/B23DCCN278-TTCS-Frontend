@@ -5,8 +5,10 @@ import { ProForm } from '@ant-design/pro-components';
 import { useEffect, useState } from 'react';
 import { callFetchAllCategory } from '@/config/api';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const SearchClient = () => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -64,8 +66,8 @@ const SearchClient = () => {
 
         if (!query) {
             notification.error({
-                message: 'Có lỗi xảy ra',
-                description: "Vui lòng chọn tiêu chí để search"
+                message: t('search.errorTitle', 'Có lỗi xảy ra'),
+                description: t('search.errorDesc', 'Vui lòng chọn tiêu chí để search')
             });
             return;
         }
@@ -83,7 +85,7 @@ const SearchClient = () => {
             }
         >
             <Row gutter={[20, 20]} align="middle">
-                <Col span={24}><h2>Tour du lịch vip nhất quả đất</h2></Col>
+                <Col span={24}><h2>{t('search.heading', 'Tour du lịch vip nhất quả đất')}</h2></Col>
 
                 {/* Thanh Danh mục: Chiếm 10/24 */}
                 <Col span={24} md={10}>
@@ -98,7 +100,7 @@ const SearchClient = () => {
                             style={{ width: '100%' }}
                             placeholder={
                                 <>
-                                    <MonitorOutlined /> Tìm theo danh mục...
+                                    <MonitorOutlined /> {t('search.categoryPlaceholder', 'Tìm theo danh mục...')}
                                 </>
                             }
                             optionLabelProp="label"
@@ -120,7 +122,7 @@ const SearchClient = () => {
                             style={{ width: '100%' }}
                             placeholder={
                                 <>
-                                    <EnvironmentOutlined /> Địa điểm...
+                                    <EnvironmentOutlined /> {t('search.locationPlaceholder', 'Địa điểm...')}
                                 </>
                             }
                             optionLabelProp="label"
@@ -136,7 +138,7 @@ const SearchClient = () => {
                         style={{ width: '100%' }}
                         onClick={() => form.submit()}
                     >
-                        Search
+                        {t('search.button', 'Search')}
                     </Button>
                 </Col>
             </Row>

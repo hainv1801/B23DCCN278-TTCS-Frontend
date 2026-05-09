@@ -1,0 +1,66 @@
+{
+  "header": {
+    "home": "Home",
+    "tour": "Tours",
+    "destination": "Hot Destinations",
+    "login": "Login",
+    "register": "Sign Up",
+    "welcome": "Welcome"
+  },
+  "booking": {
+    "history": "Booking History",
+    "status": "Status",
+    "payment": "Payment",
+    "success": "Success",
+    "failed": "Failed",
+    "message": "Redirecting to the payment gateway...",
+    "successMessage": "Booking successfully!",
+    "title": "Confirm booking",
+    "notice": "Please select the correct schedule and complete the booking information below.",
+    "departureTime": "DepartureTime",
+    "timeMessage": "Select the schedule you want",
+    "available": "Available",
+    "slot": "slots",
+    "adult": "Adult", 
+    "child": "Children (Under 12 years old)",
+    "note": "Notes (Optional)",
+    "notePlaceHolder": "Request vegetarian meal, pick up at another location...",
+    "method": "Payment Method",
+    "support": "Support ATM, Visa, QR",
+    "cash": "Cash",
+    "cashNote": "Post-payment with staff",
+    "total": "Total: ",
+    "cancel": "Cancel",
+    "confirm": "Confirm"
+  },
+  "search": {
+    "heading": "The most VIP tours on Earth",
+    "categoryPlaceholder": "Search by category...",
+    "locationPlaceholder": "Location...",
+    "button": "Search",
+    "errorTitle": "An error occurred",
+    "errorDesc": "Please select a criterion to search"
+  },
+  "destination":{
+    "title": "Popular destinations",
+    "view": "View all",
+    "empty": "Coming soon"
+  },
+  "tour":{
+    "title": "Latest tours",
+    "view":"View all",
+    "empty": "Coming soon",
+    "days": "Days",
+    "duration": "Duration",
+    "destination": "Destination",
+    "transportation": "Transportation",
+    "car": "Luxury tourist car",
+    "program": "Schedules", 
+    "startingPrice": "Base prices",
+    "booking": "Booking now!!!",
+    "tax": "Includes port fees and tax",
+    "confirm": "Confirm immediately",
+    "support": "Support 24/7",
+    "payment": "Safe and secure payment"
+  }
+}
