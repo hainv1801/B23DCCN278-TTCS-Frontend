@@ -1,4 +1,4 @@
-import { Modal, Table, Tabs, Tag } from "antd";
+import { Modal, Table, Tabs, Tag, Form, Input, Button, Row, Col, Select, message, Spin, notification } from "antd";
 import { isMobile } from "react-device-detect";
 import type { TabsProps } from 'antd';
 import { IBooking } from "@/types/backend";
@@ -6,7 +6,10 @@ import { useState, useEffect } from 'react';
 import { callFetchBookingByUser } from "@/config/api";
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
-
+import { useAppSelector, useAppDispatch } from '@/redux/hooks';
+import { useTranslation } from 'react-i18next';
+import { callUpdateUser } from '@/config/api';
+import { setUpdateUserInfoAction } from '@/redux/slice/accountSlide';
 interface IProps {
     open: boolean;
     onClose: (v: boolean) => void;
@@ -16,23 +19,17 @@ const UserBooking = () => {
     const [listBooking, setListBooking] = useState<IBooking[]>([]);
     const [isFetching, setIsFetching] = useState<boolean>(false);
 
-    // State quản lý phân trang
     const [current, setCurrent] = useState(1);
     const [pageSize, setPageSize] = useState(5);
     const [total, setTotal] = useState(0);
 
-    // Hàm fetch được tách riêng để gọi lại mỗi khi user bấm chuyển trang
     const fetchHistory = async (page: number, size: number) => {
         setIsFetching(true);
-        // Cần đảm bảo hàm gọi API này đã được sửa ở file api.ts để nhận tham số
-        // Ví dụ: return axios.get(`/api/v1/bookings/by-user?current=${page}&pageSize=${size}`)
         const res = await callFetchBookingByUser(`current=${page}&pageSize=${size}`);
         console.log(res.data);
         if (res && res.data) {
-            // Lưu dữ liệu vào bảng
             setListBooking(res.data.result);
 
-            // Cập nhật tổng số đơn hàng để hiển thị đúng số lượng trang
             if (res.data.meta && res.data.meta.total) {
                 setTotal(res.data.meta.total);
             }
@@ -40,7 +37,6 @@ const UserBooking = () => {
         setIsFetching(false);
     };
 
-    // Chạy lần đầu khi component được render
     useEffect(() => {
         fetchHistory(current, pageSize);
     }, []);
@@ -52,7 +48,6 @@ const UserBooking = () => {
             width: 50,
             align: "center",
             render: (text, record, index) => {
-                // Công thức tính STT tịnh tiến theo trang
                 return (current - 1) * pageSize + index + 1;
             }
         },
@@ -100,7 +95,7 @@ const UserBooking = () => {
         },
         {
             title: 'Ngày đặt đơn',
-            dataIndex: 'bookingDate', // Thường backend chuẩn sẽ dùng createdAt cho ngày tạo
+            dataIndex: 'bookingDate',
             key: 'bookingDate',
             render: (date: string) => {
                 return date ? dayjs(date).format('DD/MM/YYYY HH:mm:ss') : 'N/A';
@@ -108,17 +103,14 @@ const UserBooking = () => {
         },
     ];
 
-    // Xử lý sự kiện khi bấm nút chuyển trang
     const handleTableChange = (pagination: any) => {
         if (pagination && pagination.current) {
             const newCurrent = pagination.current;
             const newPageSize = pagination.pageSize;
 
-            // Cập nhật State
             setCurrent(newCurrent);
             setPageSize(newPageSize);
 
-            // Gọi lại API với số trang mới
             fetchHistory(newCurrent, newPageSize);
         }
     };
@@ -129,12 +121,11 @@ const UserBooking = () => {
                 columns={columns}
                 dataSource={listBooking}
                 loading={isFetching}
-                // Đồng bộ cấu hình phân trang vào Table
                 pagination={{
                     current: current,
                     pageSize: pageSize,
                     total: total,
-                    showSizeChanger: true, // Cho phép thay đổi số dòng / trang
+                    showSizeChanger: true,
                     pageSizeOptions: ['5', '10', '20', '50']
                 }}
                 onChange={handleTableChange}
@@ -146,35 +137,157 @@ const UserBooking = () => {
 }
 
 const UserUpdateInfo = () => {
+    const { t } = useTranslation();
+    const [form] = Form.useForm();
+    const [isSubmit, setIsSubmit] = useState<boolean>(false);
+
+    const user = useAppSelector(state => state.account.user);
+    const dispatch = useAppDispatch();
+
+    // Điền sẵn dữ liệu của user vào Form khi component được render
+    useEffect(() => {
+        if (user) {
+            console.log(user);
+            form.setFieldsValue({
+                name: user.name,
+                email: user.email,
+                age: user.age,
+                gender: user.gender,
+                address: user.address,
+            });
+        }
+    }, [user, form]);
+
+    const onFinish = async (values: any) => {
+        setIsSubmit(true);
+        // Gộp id của user vào cục data để gửi lên Backend
+        const dataUpdate = {
+            id: user.id,
+            name: values.name,
+            age: values.age,
+            gender: values.gender,
+            address: values.address
+        };
+
+        const res = await callUpdateUser(dataUpdate);
+
+        if (res && res.data) {
+            message.success(t('account.updateSuccess', 'Cập nhật thông tin thành công!'));
+            dispatch(setUpdateUserInfoAction({
+                name: values.name,
+                age: values.age,
+                gender: values.gender,
+                address: values.address
+            }));
+        } else {
+            notification.error({
+                message: t('common.error', 'Có lỗi xảy ra'),
+                description: res?.message || t('account.updateFailed', 'Không thể cập nhật thông tin')
+            });
+        }
+        setIsSubmit(false);
+    };
+
     return (
-        <div>
-            {/* //todo: Phần cập nhật thông tin cá nhân */}
-            <p>Tính năng đang phát triển...</p>
-        </div>
-    )
-}
+        <Spin spinning={isSubmit}>
+            <Form
+                form={form}
+                layout="vertical"
+                onFinish={onFinish}
+                style={{ marginTop: 20 }}
+            >
+                <Row gutter={[20, 20]}>
+                    <Col span={24} md={12}>
+                        <Form.Item
+                            label={t('account.email', 'Email đăng nhập')}
+                            name="email"
+                            tooltip="Email không thể thay đổi"
+                        >
+                            <Input disabled />
+                        </Form.Item>
+                    </Col>
+
+                    <Col span={24} md={12}>
+                        <Form.Item
+                            label={t('account.name', 'Họ và tên')}
+                            name="name"
+                            rules={[{ required: true, message: t('account.nameReq', 'Vui lòng nhập họ tên!') }]}
+                        >
+                            <Input placeholder={t('account.nameHolder', 'Nhập họ và tên...')} />
+                        </Form.Item>
+                    </Col>
+
+                    <Col span={24} md={12}>
+                        <Form.Item
+                            label={t('account.age', 'Tuổi')}
+                            name="age"
+                        >
+                            <Input type="number" min={1} placeholder={t('account.ageHolder', 'Nhập tuổi...')} />
+                        </Form.Item>
+                    </Col>
+
+                    <Col span={24} md={12}>
+                        <Form.Item
+                            label={t('account.gender', 'Giới tính')}
+                            name="gender"
+                        >
+                            <Select
+                                placeholder={t('account.genderHolder', 'Chọn giới tính')}
+                                options={[
+                                    { value: 'MALE', label: t('gender.male', 'Nam') },
+                                    { value: 'FEMALE', label: t('gender.female', 'Nữ') },
+                                    { value: 'OTHER', label: t('gender.other', 'Khác') },
+                                ]}
+                            />
+                        </Form.Item>
+                    </Col>
+
+                    <Col span={24}>
+                        <Form.Item
+                            label={t('account.address', 'Địa chỉ')}
+                            name="address"
+                        >
+                            <Input.TextArea rows={3} placeholder={t('account.addressHolder', 'Nhập địa chỉ của bạn...')} />
+                        </Form.Item>
+                    </Col>
+                </Row>
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
+                    <Button
+                        type="primary"
+                        htmlType="submit"
+                        loading={isSubmit}
+                        size="large"
+                        style={{ minWidth: 150 }}
+                    >
+                        {t('account.btnUpdate', 'Cập Nhật Thông Tin')}
+                    </Button>
+                </div>
+            </Form>
+        </Spin>
+    );
+};
 
 const ManageAccount = (props: IProps) => {
     const { open, onClose } = props;
-
+    const { t } = useTranslation();
     const onChange = (key: string) => {
-        // Có thể thêm logic gọi lại dữ liệu khi đổi tab nếu cần
     };
 
     const items: TabsProps['items'] = [
         {
             key: 'user-booking',
-            label: `Lịch sử đặt tour`,
+            label: t('account.history'),
             children: <UserBooking />,
         },
         {
             key: 'user-update-info',
-            label: `Cập nhật thông tin`,
+            label: t('account.update'),
             children: <UserUpdateInfo />,
         },
         {
             key: 'user-password',
-            label: `Thay đổi mật khẩu`,
+            label: t('account.password'),
             children: <p>Tính năng đang phát triển...</p>,
         },
     ];
@@ -182,7 +295,7 @@ const ManageAccount = (props: IProps) => {
     return (
         <>
             <Modal
-                title="Quản lý tài khoản"
+                title={t('account.title')}
                 open={open}
                 onCancel={() => onClose(false)}
                 maskClosable={false}

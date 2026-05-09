@@ -75,17 +75,17 @@ const Header = (props: any) => {
 
     const itemsDropdown = [
         {
-            label: <span onClick={() => setOpenManageAccount(true)}>{t('header.manageAccount', 'Quản lý tài khoản')}</span>,
+            label: <span onClick={() => setOpenManageAccount(true)}>{t('header.account')}</span>,
             key: 'manage-account',
             icon: <ContactsOutlined />
         },
         ...(user.role?.permissions?.length ? [{
-            label: <Link to={"/admin"}>{t('header.adminPanel', 'Trang Quản Trị')}</Link>,
+            label: <Link to={"/admin"}>{t('header.admin')}</Link>,
             key: 'admin',
             icon: <FireOutlined />
         }] : []),
         {
-            label: <span onClick={() => handleLogout()}>{t('header.logout', 'Đăng xuất')}</span>,
+            label: <span onClick={() => handleLogout()}>{t('header.logout')}</span>,
             key: 'logout',
             icon: <LogoutOutlined />
         },

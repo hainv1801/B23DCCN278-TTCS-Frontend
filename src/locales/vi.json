@@ -5,7 +5,10 @@
     "destination": "Địa Điểm Hot",
     "login": "Đăng nhập",
     "register": "Đăng ký",
-    "welcome": "Xin chào"
+    "welcome": "Xin chào",
+    "logout": "Đăng xuất",
+    "admin": "Trang Quản Trị",
+    "account": "Quản lý tài khoản"
   },
   "booking": {
     "history": "Lịch sử đặt tour",
@@ -62,5 +65,11 @@
     "confirm": "Xác nhận ngay lập tức",
     "support": "Hỗ trợ 24/7",
     "payment": "Thanh toán an toàn, bảo mật"
+  },
+  "account":{
+    "history": "Lịch sử đặt tour",
+    "update": "Cập nhật thông tin",
+    "password": "Thay đổi mật khẩu",
+    "title": "Quản lý tài khoản"
   }
 }

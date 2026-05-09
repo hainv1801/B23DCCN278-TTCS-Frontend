@@ -5,7 +5,10 @@
     "destination": "Hot Destinations",
     "login": "Login",
     "register": "Sign Up",
-    "welcome": "Welcome"
+    "welcome": "Welcome",
+    "logout": "Logout",
+    "admin": "Admin page",
+    "account": "Manage account"
   },
   "booking": {
     "history": "Booking History",
@@ -62,5 +65,11 @@
     "confirm": "Confirm immediately",
     "support": "Support 24/7",
     "payment": "Safe and secure payment"
+  },
+  "account":{
+    "history": "Booking History",
+    "update": "Update Info",
+    "password": "Change password",
+    "title": "Manage Account"
   }
 }

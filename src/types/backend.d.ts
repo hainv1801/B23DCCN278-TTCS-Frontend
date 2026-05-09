@@ -21,6 +21,9 @@ export interface IAccount {
         id: string;
         email: string;
         name: string;
+        age?: number;
+        gender?: string;
+        address?: string;
         role: {
             id: string;
             name: string;
@@ -35,12 +38,13 @@ export interface IAccount {
     }
 }
 
-export interface IGetAccount extends Omit<IAccount, "access_token"> { }
+export interface IGetAccount extends Omit<IAccount, "access_token"> {
+}
 
 export interface IUser {
     id?: string;
     name: string;
-    email: string;
+    email?: string;
     password?: string;
     age: number;
     gender: string;

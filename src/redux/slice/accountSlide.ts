@@ -16,6 +16,7 @@ interface IState {
     isRefreshToken: boolean;
     errorRefreshToken: string;
     user: {
+        gender: any;
         id: string;
         email: string;
         name: string;
@@ -30,6 +31,9 @@ interface IState {
                 module: string;
             }[]
         }
+        phone?: string;
+        age?: number | string;
+        address?: string;
     };
     activeMenu: string;
 }
@@ -43,6 +47,9 @@ const initialState: IState = {
         id: "",
         email: "",
         name: "",
+        age: "",
+        gender: "",
+        address: "",
         role: {
             id: "",
             name: "",
@@ -64,13 +71,16 @@ export const accountSlide = createSlice({
             state.activeMenu = action.payload;
         },
         setUserLoginInfo: (state, action) => {
+            console.log(action.payload);
             state.isAuthenticated = true;
             state.isLoading = false;
             state.user.id = action?.payload?.id;
             state.user.email = action.payload.email;
             state.user.name = action.payload.name;
             state.user.role = action?.payload?.role;
-
+            state.user.age = action.payload.age;
+            state.user.gender = action.payload.gender;
+            state.user.address = action.payload.address;
             if (!action?.payload?.user?.role) state.user.role = {};
             state.user.role.permissions = action?.payload?.role?.permissions ?? [];
         },
@@ -86,12 +96,23 @@ export const accountSlide = createSlice({
                     name: "",
                     permissions: [],
                 },
+                gender:"",
+                age:"",
+                address:""
             }
         },
         setRefreshTokenAction: (state, action) => {
             state.isRefreshToken = action.payload?.status ?? false;
             state.errorRefreshToken = action.payload?.message ?? "";
-        }
+        },
+        setUpdateUserInfoAction: (state, action) => {
+            // Nhận dữ liệu truyền vào từ form và cập nhật đè lên state hiện tại
+            state.user.name = action.payload.name;
+            state.user.phone = action.payload.phone;
+            state.user.age = action.payload.age;
+            state.user.gender = action.payload.gender;
+            state.user.address = action.payload.address;
+        },
 
     },
     extraReducers: (builder) => {
@@ -111,6 +132,9 @@ export const accountSlide = createSlice({
                 state.user.email = action.payload.user?.email;
                 state.user.name = action.payload.user?.name;
                 state.user.role = action?.payload?.user?.role;
+                state.user.age = action.payload.user?.age;
+                state.user.gender = action.payload.user?.gender;
+                state.user.address = action.payload.user?.address;
                 if (!action?.payload?.user?.role) state.user.role = {};
                 state.user.role.permissions = action?.payload?.user?.role?.permissions ?? [];
             }
@@ -128,7 +152,7 @@ export const accountSlide = createSlice({
 });
 
 export const {
-    setActiveMenu, setUserLoginInfo, setLogoutAction, setRefreshTokenAction
+    setActiveMenu, setUserLoginInfo, setLogoutAction, setRefreshTokenAction, setUpdateUserInfoAction
 } = accountSlide.actions;
 
 export default accountSlide.reducer;
