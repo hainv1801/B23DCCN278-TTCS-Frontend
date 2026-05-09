@@ -22,12 +22,13 @@ const ViewDetailBooking = (props: IProps) => {
     const handleChangeStatus = async () => {
         setIsSubmit(true);
 
-        const status = form.getFieldValue('status');
+        // Lấy toàn bộ giá trị từ Form (cả status và paymentStatus)
+        const values = form.getFieldsValue();
 
-        // SỬA Ở ĐÂY: Truyền vào một Object (Partial<IBooking>) chứa id và status
         const payload: Partial<IBooking> = {
             id: dataInit?.id,
-            status: status
+            status: values.status,
+            paymentStatus: values.paymentStatus // Thêm trường cập nhật thanh toán
         };
 
         const res = await callUpdateBookingStatus(payload);
@@ -49,10 +50,14 @@ const ViewDetailBooking = (props: IProps) => {
 
     useEffect(() => {
         if (dataInit) {
-            form.setFieldValue("status", dataInit.status)
+            // Đổ dữ liệu khởi tạo cho cả 2 trường
+            form.setFieldsValue({
+                status: dataInit.status,
+                paymentStatus: dataInit.paymentStatus
+            });
         }
         return () => form.resetFields();
-    }, [dataInit])
+    }, [dataInit, form])
 
     // Format tiền tệ
     const formatCurrency = (value: number | undefined) => {
@@ -76,64 +81,68 @@ const ViewDetailBooking = (props: IProps) => {
                     </Button>
                 }
             >
-                <Descriptions title="Chi tiết đơn hàng" bordered column={2} layout="vertical">
+                {/* Bọc toàn bộ Descriptions bằng Form để quản lý nhiều trường dễ hơn */}
+                <Form form={form} layout="vertical">
+                    <Descriptions title="Chi tiết đơn hàng" bordered column={2} layout="vertical">
 
-                    <Descriptions.Item label="Khách hàng (Người đặt)">
-                        {dataInit?.user?.name} <br />
-                        {dataInit?.user?.email}
-                    </Descriptions.Item>
+                        <Descriptions.Item label="Khách hàng (Người đặt)">
+                            {dataInit?.user?.name} <br />
+                            {dataInit?.user?.email}
+                        </Descriptions.Item>
 
-                    <Descriptions.Item label="Trạng thái đơn">
-                        <Form form={form}>
-                            <Form.Item name={"status"} style={{ marginBottom: 0 }}>
-                                <Select style={{ width: "100%" }} defaultValue={dataInit?.status}>
+                        <Descriptions.Item label="Trạng thái đơn">
+                            <Form.Item name="status" style={{ marginBottom: 0 }}>
+                                <Select style={{ width: "100%" }}>
                                     <Option value="PENDING">Chờ xử lý (PENDING)</Option>
                                     <Option value="CONFIRMED">Đã xác nhận (CONFIRMED)</Option>
                                     <Option value="CANCELLED">Đã hủy (CANCELLED)</Option>
+                                    <Option value="COMPLETED">Hoàn thành (COMPLETED)</Option>
                                 </Select>
                             </Form.Item>
-                        </Form>
-                    </Descriptions.Item>
+                        </Descriptions.Item>
 
-                    <Descriptions.Item label="Tour đăng ký" span={2}>
-                        <strong>{dataInit?.tourSchedule?.tour?.name}</strong>
-                    </Descriptions.Item>
+                        <Descriptions.Item label="Tour đăng ký" span={2}>
+                            <strong>{dataInit?.schedule?.tourName}</strong>
+                        </Descriptions.Item>
 
-                    <Descriptions.Item label="Ngày khởi hành">
-                        {dataInit?.tourSchedule?.departureDate ? dayjs(dataInit?.tourSchedule?.departureDate).format('DD-MM-YYYY') : ""}
-                    </Descriptions.Item>
+                        <Descriptions.Item label="Ngày khởi hành">
+                            {dataInit?.schedule?.departureDate ? dayjs(dataInit?.schedule?.departureDate).format('DD-MM-YYYY') : ""}
+                        </Descriptions.Item>
 
-                    <Descriptions.Item label="Ngày trở về">
-                        {dataInit?.tourSchedule?.returnDate ? dayjs(dataInit?.tourSchedule?.returnDate).format('DD-MM-YYYY') : ""}
-                    </Descriptions.Item>
+                        <Descriptions.Item label="Ngày trở về">
+                            {dataInit?.schedule?.returnDate ? dayjs(dataInit?.schedule?.returnDate).format('DD-MM-YYYY') : ""}
+                        </Descriptions.Item>
 
-                    <Descriptions.Item label="Số lượng hành khách">
-                        Người lớn: <strong>{dataInit?.totalAdults}</strong> <br />
-                        Trẻ em: <strong>{dataInit?.totalChildren}</strong>
-                    </Descriptions.Item>
+                        <Descriptions.Item label="Số lượng hành khách">
+                            Người lớn: <strong>{dataInit?.totalAdults}</strong> <br />
+                            Trẻ em: <strong>{dataInit?.totalChildren}</strong>
+                        </Descriptions.Item>
 
-                    <Descriptions.Item label="Thanh toán">
-                        Tổng tiền: <strong style={{ color: '#d9363e', fontSize: '16px' }}>{formatCurrency(dataInit?.totalPrice)}</strong> <br />
-                        Tình trạng: {
-                            dataInit?.paymentStatus === 'PAID' ? <Tag color="success">Đã thanh toán</Tag> :
-                                dataInit?.paymentStatus === 'REFUNDED' ? <Tag color="default">Đã hoàn tiền</Tag> :
-                                    <Tag color="warning">Chưa thanh toán</Tag>
-                        }
-                    </Descriptions.Item>
+                        {/* Thêm ô Select cho Trạng thái thanh toán tại đây */}
+                        <Descriptions.Item label="Thanh toán">
+                            <div style={{ marginBottom: 8 }}>
+                                Tổng tiền: <strong style={{ color: '#d9363e', fontSize: '16px' }}>{formatCurrency(dataInit?.totalPrice)}</strong>
+                            </div>
+                            <Form.Item name="paymentStatus" style={{ marginBottom: 0 }}>
+                                <Select style={{ width: "100%" }}>
+                                    <Option value="UNPAID">Chưa thanh toán (UNPAID)</Option>
+                                    <Option value="PAID">Đã thanh toán đủ (PAID)</Option>
+                                    <Option value="REFUNDED">Đã hoàn tiền (REFUNDED)</Option>
+                                    <Option value="FAILED">Thanh toán lỗi (FAILED)</Option>
+                                </Select>
+                            </Form.Item>
+                        </Descriptions.Item>
 
-                    <Descriptions.Item label="Ghi chú của khách hàng" span={2}>
-                        {dataInit?.note || "Không có ghi chú"}
-                    </Descriptions.Item>
+                        <Descriptions.Item label="Ghi chú của khách hàng" span={2}>
+                            {dataInit?.note || "Không có ghi chú"}
+                        </Descriptions.Item>
 
-                    <Descriptions.Item label="Ngày tạo đơn">
-                        {dataInit && dataInit.createdAt ? dayjs(dataInit.createdAt).format('DD-MM-YYYY HH:mm:ss') : ""}
-                    </Descriptions.Item>
+                        <Descriptions.Item label="Ngày tạo đơn">
+                            {dataInit && dataInit.bookingDate ? dayjs(dataInit.bookingDate).format('DD-MM-YYYY HH:mm:ss') : ""}
+                        </Descriptions.Item>
 
-                    <Descriptions.Item label="Cập nhật lần cuối">
-                        {dataInit && dataInit.updatedAt ? dayjs(dataInit.updatedAt).format('DD-MM-YYYY HH:mm:ss') : ""}
-                    </Descriptions.Item>
-
-                </Descriptions>
+                    </Descriptions>
+                </Form>
             </Drawer>
         </>
     )

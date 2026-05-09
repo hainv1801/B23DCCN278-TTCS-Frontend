@@ -71,7 +71,7 @@ const BookingPage = () => {
         },
         {
             title: 'Tên Tour',
-            dataIndex: ["tourSchedule", "tour", "name"],
+            dataIndex: ["schedule", "tourName"],
             hideInSearch: true,
             ellipsis: true, // Thêm ellipsis để cắt chữ nếu tên tour quá dài
         },
@@ -90,7 +90,7 @@ const BookingPage = () => {
             sorter: true,
             render: (text, record, index, action) => {
                 // Hiển thị tag màu sắc cho dễ nhìn
-                const color = record.status === 'CONFIRMED' ? 'green' : record.status === 'CANCELLED' ? 'red' : 'gold';
+                const color = (record.status === 'CONFIRMED' || record.status === 'COMPLETED') ? 'green' : record.status === 'CANCELLED' ? 'red' : 'gold';
                 return <Tag color={color}>{record.status}</Tag>
             },
             renderFormItem: (item, props, form) => (
@@ -102,6 +102,7 @@ const BookingPage = () => {
                         PENDING: 'PENDING',
                         CONFIRMED: 'CONFIRMED',
                         CANCELLED: 'CANCELLED',
+                        COMPLETED: 'COMPLETED'
                     }}
                     placeholder="Chọn trạng thái"
                 />
@@ -188,7 +189,6 @@ const BookingPage = () => {
 
     return (
         <div>
-            {/* Tạm thời dùng fallback ?? ALL_PERMISSIONS.RESUMES.GET_PAGINATE nếu bạn chưa sửa file config */}
             <Access
                 permission={ALL_PERMISSIONS.BOOKINGS?.GET_PAGINATE ?? ALL_PERMISSIONS.BOOKINGS.GET_PAGINATE}
             >

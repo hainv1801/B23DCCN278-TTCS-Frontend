@@ -150,8 +150,8 @@ export interface IBooking {
     totalAdults: number;
     totalChildren: number;
     totalPrice: number;
-    status: 'PENDING' | 'CONFIRMED' | 'CANCELLED';
-    paymentStatus: 'UNPAID' | 'PAID' | 'REFUNDED';
+    status: 'PENDING' | 'CONFIRMED' | 'CANCELLED'| 'COMPLETED';
+    paymentStatus: 'UNPAID' | 'PAID' | 'REFUNDED' | 'FAILED';
     note?: string;
     user?: {
         id: number;
@@ -170,8 +170,8 @@ export interface IPayment {
     id?: number;
     booking?: IBooking;
     amount: number;
-    paymentMethod: 'CASH' | 'BANK_TRANSFER' | 'CREDIT_CARD';
-    status: 'UNPAID' | 'SUCCESS' | 'FAILED' | 'REFUNDED';
+    paymentMethod: 'CASH' | 'BANK_TRANSFER' | 'CREDIT_CARD' | 'VNPAY';
+    status: 'UNPAID' | 'PAID' | 'FAILED' | 'REFUNDED';
     transactionCode: string;
     bankCode: string;
     paymentDate: string;

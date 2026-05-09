@@ -71,5 +71,15 @@
     "update": "Update Info",
     "password": "Change password",
     "title": "Manage Account"
-  }
+  },
+  "comment": {
+    "title": "Reviews & Comments",
+    "loginPrompt": "Log in to see if you are eligible to review.",
+    "onlyVerified": "Only verified customers can leave a review",
+    "verifiedPrompt": "Our system shows you haven't completed this Tour. Book and experience it to leave a review!",
+    "requireMsg": "Please enter your content!",
+    "placeholder": "Share your authentic experience about this tour...",
+    "btnSubmit": "Submit Review",
+    "success": "Review submitted successfully!"
+}
 }

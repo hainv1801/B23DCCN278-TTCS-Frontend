@@ -71,5 +71,15 @@
     "update": "Cập nhật thông tin",
     "password": "Thay đổi mật khẩu",
     "title": "Quản lý tài khoản"
-  }
+  },
+  "comment": {
+    "title": "Đánh giá & Bình luận",
+    "loginPrompt": "Đăng nhập để xem bạn có đủ điều kiện đánh giá không.",
+    "onlyVerified": "Chỉ khách hàng đã trải nghiệm mới được đánh giá",
+    "verifiedPrompt": "Hệ thống ghi nhận bạn chưa hoàn thành Tour này. Hãy đặt tour và trải nghiệm thực tế để để lại đánh giá nhé!",
+    "requireMsg": "Vui lòng nhập nội dung!",
+    "placeholder": "Chia sẻ trải nghiệm chân thực của bạn về tour này...",
+    "btnSubmit": "Gửi Đánh Giá",
+    "success": "Đã gửi đánh giá thành công!"
+}
 }

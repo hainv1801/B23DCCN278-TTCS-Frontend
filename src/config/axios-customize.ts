@@ -72,6 +72,10 @@ instance.interceptors.response.use(
         }
 
         if (+error?.response?.status === 403) {
+            const originalRequest = error.config;
+            if (originalRequest.url.includes('/api/v1/comments/check-eligibility')) {
+                return Promise.reject(error); // Trả về lỗi ngầm định để file TourComment.tsx bắt, không văng popup
+            }
             notification.error({
                 message: error?.response?.data?.message ?? "",
                 description: error?.response?.data?.error ?? ""

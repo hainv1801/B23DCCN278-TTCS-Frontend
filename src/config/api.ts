@@ -241,3 +241,20 @@ export const callVerifyVNPay = (queryString: string) => {
     // Truyền toàn bộ query parameter xuống backend để verify
     return axios.get(`/api/v1/payments/vnpay-return?${queryString}`);
 };
+
+/**
+ * Module Comments
+ */
+export const callFetchCommentsByTour = (tourId: number, query: string) => {
+    return axios.get(`/api/v1/comments/tour/${tourId}?${query}`);
+};
+
+// Kiểm tra quyền
+export const callCheckCommentEligibility = (tourId: number) => {
+    return axios.get(`/api/v1/comments/check-eligibility?tourId=${tourId}`);
+};
+
+// Đăng bình luận
+export const callCreateComment = (data: any) => {
+    return axios.post('/api/v1/comments', data);
+};

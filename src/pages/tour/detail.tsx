@@ -5,7 +5,7 @@ import { callFetchTourById } from "@/config/api";
 import styles from 'styles/client.module.scss';
 import parse from 'html-react-parser';
 import { useTranslation } from 'react-i18next'; // Thêm đa ngôn ngữ
-
+import TourComment from "@/components/client/card/TourComment";
 import { Col, Divider, Row, Skeleton, Tag, Card, Typography, Space, Button, Breadcrumb } from "antd";
 import {
     EnvironmentOutlined,
@@ -143,6 +143,10 @@ const ClientTourDetailPage = (props: any) => {
                                             </Typography>
                                         </div>
                                     </Card>
+
+                                    {/* Phần comment */}
+                                    <TourComment tourId={tourDetail.id} />
+
                                 </Col>
 
                                 {/* CỘT PHẢI: KHỐI CTA ĐẶT TOUR */}
