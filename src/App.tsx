@@ -33,6 +33,8 @@ import TourTabs from './pages/admin/tour/tour.tabs';
 import PaymentReturnPage from './pages/payment/PaymentReturnPage';
 // import CategoryPage from './pages/admin/category';
 import ViewUpsertTourSchedule from './components/admin/tour/upsert.tour.schedule';
+import MyTasksPage from './pages/admin/MyTasksPage';
+import TourSchedulePage from './pages/admin/tourschedule';
 const LayoutClient = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const location = useLocation();
@@ -126,9 +128,30 @@ export default function App() {
         },
         {
           path: "tour-schedule",
+          children: [
+            {
+              index: true,
+              element: (
+                <ProtectedRoute>
+                  <TourSchedulePage />
+                </ProtectedRoute>
+              )
+            },
+            {
+              path: "upsert",
+              element: (
+                <ProtectedRoute>
+                  <ViewUpsertTourSchedule />
+                </ProtectedRoute>
+              )
+            }
+          ]
+        },
+        {
+          path: "my-tasks",
           element:
             <ProtectedRoute>
-              <ViewUpsertTourSchedule />
+              <MyTasksPage />
             </ProtectedRoute>
         },
         {

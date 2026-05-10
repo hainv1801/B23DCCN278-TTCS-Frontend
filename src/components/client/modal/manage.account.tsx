@@ -1,9 +1,9 @@
-import { Modal, Table, Tabs, Tag, Form, Input, Button, Row, Col, Select, message, Spin, notification } from "antd";
+import { Modal, Table, Tabs, Tag, Form, Input, Button, Row, Col, Select, message, Spin, notification, Popconfirm } from "antd";
 import { isMobile } from "react-device-detect";
 import type { TabsProps } from 'antd';
 import { IBooking } from "@/types/backend";
 import { useState, useEffect } from 'react';
-import { callFetchBookingByUser } from "@/config/api";
+import { callFetchBookingByUser, callUpdateBookingStatus } from "@/config/api";
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import { useAppSelector, useAppDispatch } from '@/redux/hooks';
@@ -36,7 +36,27 @@ const UserBooking = () => {
         }
         setIsFetching(false);
     };
+    const handleCancelBooking = async (record: any) => {
+        // Payload truyền lên backend giống cấu trúc lúc Update
+        const payload: Partial<IBooking> = {
+            id: record.id,
+            status: 'CANCELLED',
+            paymentStatus: record.paymentStatus, // Giữ nguyên trạng thái thanh toán hiện tại
+        };
+        console.log("Payload", payload);
+        const res = await callUpdateBookingStatus(payload);
 
+        if (res && res.data) {
+            message.success('Hủy đơn đặt tour thành công!');
+            // Gọi lại hàm fetch danh sách lịch sử booking ở đây để table tự động render lại
+            fetchHistory(current, pageSize);
+        } else {
+            notification.error({
+                message: 'Có lỗi xảy ra',
+                description: res.message
+            });
+        }
+    };
     useEffect(() => {
         fetchHistory(current, pageSize);
     }, []);
@@ -80,10 +100,14 @@ const UserBooking = () => {
         {
             title: 'Trạng thái Đơn',
             dataIndex: "status",
-            render(value) {
-                const color = value === 'CONFIRMED' || value === 'SUCCESS' ? 'green' : value === 'CANCELLED' ? 'red' : 'gold';
-                return <Tag color={color}>{value || 'PENDING'}</Tag>
-            },
+            render: (status: string) => {
+                let color = 'default';
+                if (status === 'PENDING') color = 'gold';
+                if (status === 'CONFIRMED') color = 'blue';
+                if (status === 'COMPLETED') color = 'green';
+                if (status === 'CANCELLED') color = 'red';
+                return <Tag color={color}>{status}</Tag>;
+            }
         },
         {
             title: 'Thanh toán',
@@ -101,6 +125,37 @@ const UserBooking = () => {
                 return date ? dayjs(date).format('DD/MM/YYYY HH:mm:ss') : 'N/A';
             },
         },
+        {
+            title: 'Hành động',
+            render: (_: any, record: any) => {
+                // Chỉ cho phép hủy khi đơn chưa bị hủy và chưa hoàn thành
+                const canCancel = record.status === 'PENDING' || record.status === 'CONFIRMED';
+
+                return canCancel ? (
+                    <Popconfirm
+                        title="Xác nhận hủy tour"
+                        description={
+                            <div>
+                                Bạn có chắc chắn muốn hủy đơn đặt tour này không?
+                                {record.paymentStatus === 'PAID' && (
+                                    <p style={{ color: 'red', margin: 0 }}>
+                                        * Đơn này đã thanh toán. Vui lòng liên hệ CSKH để được hoàn tiền.
+                                    </p>
+                                )}
+                            </div>
+                        }
+                        onConfirm={() => handleCancelBooking(record)}
+                        okText="Xác nhận hủy"
+                        cancelText="Đóng"
+                        placement="left"
+                    >
+                        <Button danger type="dashed" size="small">
+                            Hủy đơn
+                        </Button>
+                    </Popconfirm>
+                ) : null;
+            }
+        }
     ];
 
     const handleTableChange = (pagination: any) => {

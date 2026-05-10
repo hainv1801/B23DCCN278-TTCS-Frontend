@@ -112,6 +112,9 @@ export const callFetchUser = (query: string) => {
     return axios.get<IBackendRes<IModelPaginate<IUser>>>(`/api/v1/users?${query}`);
 }
 
+export const callFetchAvailableGuides = (startDate: string, endDate: string) => {
+    return axios.get(`/api/v1/users/available-guides?startDate=${startDate}&endDate=${endDate}`);
+};
 /**
  *
 Module Tour
@@ -156,6 +159,10 @@ export const callFetchTourSchedule = (query: string) => {
 export const callFetchTourScheduleById = (id: number | string) => {
     return axios.get<IBackendRes<ITourSchedule>>(`/api/v1/tour-schedules/${id}`);
 }
+
+export const callFetchMyTasks = (query: string) => {
+    return axios.get(`/api/v1/tour-schedules/my-tasks?${query}`);
+};
 /**
  * 
 Module Booking

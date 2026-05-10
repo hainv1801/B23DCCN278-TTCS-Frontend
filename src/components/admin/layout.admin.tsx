@@ -10,6 +10,7 @@ import {
     AliwangwangOutlined,
     BugOutlined,
     ScheduleOutlined,
+    CalendarOutlined,
 } from '@ant-design/icons';
 import { Layout, Menu, Dropdown, Space, message, Avatar, Button } from 'antd';
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
@@ -38,6 +39,8 @@ const LayoutAdmin = () => {
 
     useEffect(() => {
         const ACL_ENABLE = import.meta.env.VITE_ACL_ENABLE;
+        const userRoleName = user?.role?.name;
+        console.log(user);
         if (permissions?.length || ACL_ENABLE === 'false') {
 
             const viewDestination = permissions?.find(item =>
@@ -99,6 +102,11 @@ const LayoutAdmin = () => {
                     label: <Link to='/admin/tour-schedule'>Tour Schedule</Link>,
                     key: '/admin/tour-schedule',
                     icon: <ScheduleOutlined />
+                }] : []),
+                ...(userRoleName === 'Guide' || ACL_ENABLE === 'false' ? [{
+                    label: <Link to='/admin/my-tasks'>Lịch phân công</Link>,
+                    key: '/admin/my-tasks',
+                    icon: <CalendarOutlined />
                 }] : []),
                 ...(viewBooking || ACL_ENABLE === 'false' ? [{
                     label: <Link to='/admin/booking'>Booking</Link>,

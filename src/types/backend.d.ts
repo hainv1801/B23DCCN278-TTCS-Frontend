@@ -136,10 +136,15 @@ export interface ITourSchedule {
     capacity: number;
     bookedSeats: number;
     status: 'OPEN' | 'CLOSED' | 'CANCELLED' | 'FULL';
-    tour?: {
+    tourInfo?: {
         id: number;
         name: string;
     };
+    guideInfo?:{
+        id: number;
+        name: string;
+        email: string;
+    }
     createdAt?: string;
     updatedAt?: string;
 }

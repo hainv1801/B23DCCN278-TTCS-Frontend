@@ -57,6 +57,7 @@ export function DebounceSelect<
             onSearch={debounceFetcher}
             notFoundContent={fetching ? <Spin size="small" /> : null}
             {...props}
+            value={value}
             options={options}
             onFocus={handleOnFocus}
             onBlur={handleOnBlur}

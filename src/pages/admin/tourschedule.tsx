@@ -9,7 +9,7 @@ import dayjs from 'dayjs';
 import { callDeleteTourSchedule } from "@/config/api";
 import queryString from 'query-string';
 import { useNavigate } from "react-router-dom";
-import { fetchTourSchedule } from "@/redux/slice/tourScheduleSlide"; // Cần tạo slice này
+import { fetchTourSchedule } from "@/redux/slice/tourScheduleSlide";
 import Access from "@/components/share/access";
 import { ALL_PERMISSIONS } from "@/config/permissions";
 import { sfIn } from "spring-filter-query-builder";
@@ -54,17 +54,35 @@ const TourSchedulePage = () => {
             width: 50,
             align: "center",
             render: (text, record, index) => {
-                return (
-                    <>
-                        {(index + 1) + (meta.page - 1) * (meta.pageSize)}
-                    </>)
+                return <>{(index + 1) + (meta.page - 1) * (meta.pageSize)}</>
             },
             hideInSearch: true,
         },
         {
             title: 'Tên Tour',
-            dataIndex: ["tour", "name"],
-            hideInSearch: true, // Ẩn search để tránh lỗi join query phức tạp
+            dataIndex: 'tourInfo',
+            render: (text, record) => {
+                return (
+                    <strong style={{ color: '#333' }}>
+                        {record?.tourInfo?.name || 'N/A'}
+                    </strong>
+                );
+            },
+            hideInSearch: true,
+            ellipsis: true,
+        },
+        {
+            title: 'Hướng dẫn viên',
+            dataIndex: 'guideInfo',
+            render: (text, record) => {
+                console.log(record);
+                return (
+                    <strong style={{ color: '#333' }}>
+                        {record?.guideInfo?.name || 'N/A'}
+                    </strong>
+                );
+            },
+            hideInSearch: true,
             ellipsis: true,
         },
         {
@@ -72,9 +90,11 @@ const TourSchedulePage = () => {
             dataIndex: 'departureDate',
             valueType: 'date',
             sorter: true,
-            render: (text, record, index, action) => {
+            render: (text, record) => {
+                // Đổi màu nếu lịch trình trong quá khứ
+                const isPast = dayjs(record.departureDate).isBefore(dayjs(), 'day');
                 return (
-                    <strong style={{ color: '#1890ff' }}>
+                    <strong style={{ color: isPast ? '#bfbfbf' : '#1890ff' }}>
                         {record.departureDate ? dayjs(record.departureDate).format('DD-MM-YYYY') : ""}
                     </strong>
                 )
@@ -85,16 +105,14 @@ const TourSchedulePage = () => {
             dataIndex: 'returnDate',
             valueType: 'date',
             hideInSearch: true,
-            render: (text, record, index, action) => {
-                return (
-                    <>{record.returnDate ? dayjs(record.returnDate).format('DD-MM-YYYY') : ""}</>
-                )
+            render: (text, record) => {
+                return <>{record.returnDate ? dayjs(record.returnDate).format('DD-MM-YYYY') : ""}</>
             },
         },
         {
             title: 'Tình trạng chỗ',
             hideInSearch: true,
-            render: (text, record, index, action) => {
+            render: (text, record) => {
                 const isFull = record.bookedSeats >= record.capacity;
                 return (
                     <Tag color={isFull ? "red" : "blue"}>
@@ -106,7 +124,7 @@ const TourSchedulePage = () => {
         {
             title: 'Giá vé (NL / TE)',
             hideInSearch: true,
-            render: (text, record, index, action) => {
+            render: (text, record) => {
                 return (
                     <div>
                         <span style={{ color: '#d9363e', fontWeight: 'bold' }}>{formatCurrency(record.priceAdult)}</span>
@@ -120,11 +138,14 @@ const TourSchedulePage = () => {
             title: 'Trạng thái',
             dataIndex: 'status',
             sorter: true,
-            render: (text, record, index, action) => {
-                const color = record.status === 'OPEN' ? 'green' : record.status === 'CANCELLED' ? 'red' : 'default';
+            render: (text, record) => {
+                let color = 'default';
+                if (record.status === 'OPEN') color = 'green';
+                if (record.status === 'CLOSED' || record.status === 'FULL') color = 'gold';
+                if (record.status === 'CANCELLED') color = 'red';
                 return <Tag color={color}>{record.status}</Tag>
             },
-            renderFormItem: (item, props, form) => (
+            renderFormItem: () => (
                 <ProFormSelect
                     showSearch
                     mode="multiple"
@@ -132,6 +153,7 @@ const TourSchedulePage = () => {
                     valueEnum={{
                         OPEN: 'Đang mở',
                         CLOSED: 'Đã đóng',
+                        FULL: 'Đã đầy',
                         CANCELLED: 'Đã hủy',
                     }}
                     placeholder="Chọn trạng thái"
@@ -142,27 +164,18 @@ const TourSchedulePage = () => {
             title: 'Hành động',
             hideInSearch: true,
             width: 100,
-            render: (_value, entity, _index, _action) => (
+            render: (_value, entity) => (
                 <Space>
-                    <Access
-                        permission={ALL_PERMISSIONS.TOUR_SCHEDULES?.UPDATE ?? ALL_PERMISSIONS.TOUR_SCHEDULES.UPDATE}
-                        hideChildren
-                    >
+                    <Access permission={ALL_PERMISSIONS.TOUR_SCHEDULES?.UPDATE ?? ALL_PERMISSIONS.TOUR_SCHEDULES.UPDATE} hideChildren>
                         <EditOutlined
-                            style={{
-                                fontSize: 20,
-                                color: '#ffa500',
-                            }}
-                            type=""
+                            style={{ fontSize: 20, color: '#ffa500', opacity: entity.status === 'CANCELLED' ? 0.5 : 1 }}
                             onClick={() => {
-                                navigate(`/admin/tour-schedule/upsert?id=${entity.id}`)
+                                if (entity.status !== 'CANCELLED') navigate(`/admin/tour-schedule/upsert?id=${entity.id}`);
+                                else message.warning("Không thể sửa lịch trình đã bị hủy.");
                             }}
                         />
                     </Access >
-                    <Access
-                        permission={ALL_PERMISSIONS.TOUR_SCHEDULES?.DELETE ?? ALL_PERMISSIONS.TOUR_SCHEDULES.DELETE}
-                        hideChildren
-                    >
+                    <Access permission={ALL_PERMISSIONS.TOUR_SCHEDULES?.DELETE ?? ALL_PERMISSIONS.TOUR_SCHEDULES.DELETE} hideChildren>
                         <Popconfirm
                             placement="leftTop"
                             title={"Xác nhận xóa"}
@@ -172,12 +185,7 @@ const TourSchedulePage = () => {
                             cancelText="Hủy"
                         >
                             <span style={{ cursor: "pointer", margin: "0 10px" }}>
-                                <DeleteOutlined
-                                    style={{
-                                        fontSize: 20,
-                                        color: '#ff4d4f',
-                                    }}
-                                />
+                                <DeleteOutlined style={{ fontSize: 20, color: '#ff4d4f' }} />
                             </span>
                         </Popconfirm>
                     </Access>
@@ -186,15 +194,15 @@ const TourSchedulePage = () => {
         },
     ];
 
-    const buildQuery = (params: any, sort: any, filter: any) => {
+    const buildQuery = (params: any, sort: any) => {
         const clone = { ...params };
-
         let parts = [];
 
-        // Lọc theo ngày đi
-        if (clone.departureDate) parts.push(`departureDate = '${clone.departureDate}'`);
+        // Đảm bảo Spring Filter Query Builder xử lý ngày chính xác bằng toán tử ~ (like) hoặc =
+        if (clone.departureDate) {
+            parts.push(`departureDate = '${clone.departureDate}'`);
+        }
 
-        // Lọc theo trạng thái
         if (clone?.status?.length) {
             parts.push(`${sfIn("status", clone.status).toString()}`);
         }
@@ -211,23 +219,14 @@ const TourSchedulePage = () => {
         delete clone.status;
 
         let temp = queryString.stringify(clone);
-
         let sortBy = "";
-        const fields = ["departureDate", "status", "createdAt", "updatedAt"];
-        if (sort) {
-            for (const field of fields) {
-                if (sort[field]) {
-                    sortBy = `sort=${field},${sort[field] === 'ascend' ? 'asc' : 'desc'}`;
-                    break;
-                }
-            }
-        }
 
-        // Mặc định sort theo ngày đi gần nhất
-        if (Object.keys(sortBy).length === 0) {
-            temp = `${temp}&sort=departureDate,asc`;
-        } else {
+        if (sort && Object.keys(sort).length > 0) {
+            const field = Object.keys(sort)[0];
+            sortBy = `sort=${field},${sort[field] === 'ascend' ? 'asc' : 'desc'}`;
             temp = `${temp}&${sortBy}`;
+        } else {
+            temp = `${temp}&sort=departureDate,asc`;
         }
 
         return temp;
@@ -235,9 +234,7 @@ const TourSchedulePage = () => {
 
     return (
         <div>
-            <Access
-                permission={ALL_PERMISSIONS.TOUR_SCHEDULES?.GET_PAGINATE ?? ALL_PERMISSIONS.TOUR_SCHEDULES.GET_PAGINATE}
-            >
+            <Access permission={ALL_PERMISSIONS.TOUR_SCHEDULES?.GET_PAGINATE ?? ALL_PERMISSIONS.TOUR_SCHEDULES.GET_PAGINATE}>
                 <DataTable<ITourSchedule>
                     actionRef={tableRef}
                     headerTitle="Quản lý Lịch trình Tour"
@@ -246,31 +243,28 @@ const TourSchedulePage = () => {
                     columns={columns}
                     dataSource={tourSchedules}
                     request={async (params, sort, filter): Promise<any> => {
-                        const query = buildQuery(params, sort, filter);
+                        const query = buildQuery(params, sort);
                         dispatch(fetchTourSchedule({ query }))
                     }}
                     scroll={{ x: true }}
-                    pagination={
-                        {
-                            current: meta.page,
-                            pageSize: meta.pageSize,
-                            showSizeChanger: true,
-                            total: meta.total,
-                            showTotal: (total, range) => { return (<div> {range[0]}-{range[1]} trên {total} dòng</div>) }
-                        }
-                    }
-                    rowSelection={false}
-                    toolBarRender={(_action, _rows): any => {
-                        return (
-                            <Button
-                                icon={<PlusOutlined />}
-                                type="primary"
-                                onClick={() => navigate('upsert')}
-                            >
-                                Thêm mới
-                            </Button>
-                        );
+                    pagination={{
+                        current: meta.page,
+                        pageSize: meta.pageSize,
+                        showSizeChanger: true,
+                        total: meta.total,
+                        showTotal: (total, range) => <div> {range[0]}-{range[1]} trên {total} dòng</div>
                     }}
+                    rowSelection={false}
+                    toolBarRender={() => [
+                        <Button
+                            key="create-new" // Khi trả về mảng, React yêu cầu có key
+                            icon={<PlusOutlined />}
+                            type="primary"
+                            onClick={() => navigate('upsert')}
+                        >
+                            Thêm mới
+                        </Button>
+                    ]}
                 />
             </Access>
         </div >
