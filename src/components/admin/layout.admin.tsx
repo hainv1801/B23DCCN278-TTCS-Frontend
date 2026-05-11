@@ -11,6 +11,7 @@ import {
     BugOutlined,
     ScheduleOutlined,
     CalendarOutlined,
+    GiftOutlined
 } from '@ant-design/icons';
 import { Layout, Menu, Dropdown, Space, message, Avatar, Button } from 'antd';
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
@@ -75,7 +76,10 @@ const LayoutAdmin = () => {
                 item.apiPath === ALL_PERMISSIONS.PERMISSIONS.GET_PAGINATE.apiPath
                 && item.method === ALL_PERMISSIONS.PERMISSIONS.GET_PAGINATE.method
             )
-
+            const viewVoucher = permissions?.find(item =>
+                item.apiPath === ALL_PERMISSIONS.VOUCHERS.GET_PAGINATE.apiPath
+                && item.method === ALL_PERMISSIONS.VOUCHERS.GET_PAGINATE.method
+            )
             const full = [
                 {
                     label: <Link to='/admin'>Dashboard</Link>,
@@ -112,6 +116,11 @@ const LayoutAdmin = () => {
                     label: <Link to='/admin/booking'>Booking</Link>,
                     key: '/admin/booking',
                     icon: <AliwangwangOutlined />
+                }] : []),
+                ...(viewVoucher || ACL_ENABLE === 'false' ? [{
+                    label: <Link to='/admin/voucher'>Voucher</Link>,
+                    key: '/admin/voucher',
+                    icon: <GiftOutlined />
                 }] : []),
                 ...(viewPermission || ACL_ENABLE === 'false' ? [{
                     label: <Link to='/admin/permission'>Permission</Link>,

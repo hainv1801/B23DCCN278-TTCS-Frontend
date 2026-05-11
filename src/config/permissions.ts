@@ -49,4 +49,10 @@ export const ALL_PERMISSIONS = {
         UPDATE: { method: "PUT", apiPath: '/api/v1/users', module: "USERS" },
         DELETE: { method: "DELETE", apiPath: '/api/v1/users/{id}', module: "USERS" },
     },
+    VOUCHERS: {
+        GET_PAGINATE: { method: "GET", apiPath: '/api/v1/vouchers', module: "VOUCHERS" },
+        CREATE: { method: "POST", apiPath: '/api/v1/vouchers', module: "VOUCHERS" },
+        UPDATE: { method: "PUT", apiPath: '/api/v1/vouchers', module: "VOUCHERS" },
+        DELETE: { method: "DELETE", apiPath: '/api/v1/vouchers/{id}', module: "VOUCHERS" },
+    },
 }

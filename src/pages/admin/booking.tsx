@@ -124,7 +124,7 @@ const BookingPage = () => {
             sorter: true,
             render: (text, record, index, action) => {
                 return (
-                    <>{record.createdAt ? dayjs(record.createdAt).format('DD-MM-YYYY HH:mm') : ""}</>
+                    <>{record.bookingDate ? dayjs(record.bookingDate).format('DD-MM-YYYY HH:mm') : ""}</>
                 )
             },
             hideInSearch: true,

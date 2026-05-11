@@ -35,6 +35,7 @@ import PaymentReturnPage from './pages/payment/PaymentReturnPage';
 import ViewUpsertTourSchedule from './components/admin/tour/upsert.tour.schedule';
 import MyTasksPage from './pages/admin/MyTasksPage';
 import TourSchedulePage from './pages/admin/tourschedule';
+import VoucherPage from './pages/admin/voucher';
 const LayoutClient = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const location = useLocation();
@@ -159,6 +160,13 @@ export default function App() {
           element:
             <ProtectedRoute>
               <BookingPage />
+            </ProtectedRoute>
+        },
+        {
+          path: "voucher",
+          element:
+            <ProtectedRoute>
+              <VoucherPage />
             </ProtectedRoute>
         },
         {

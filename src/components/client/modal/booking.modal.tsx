@@ -1,8 +1,8 @@
 import { Modal, Form, InputNumber, Radio, Button, Typography, Divider, Space, message, Row, Col, Card, Select, Input } from 'antd';
-import { CreditCardOutlined, MoneyCollectOutlined, UserOutlined, CalendarOutlined } from '@ant-design/icons';
+import { CreditCardOutlined, MoneyCollectOutlined, UserOutlined, CalendarOutlined, TagOutlined } from '@ant-design/icons';
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { callCreateBooking, callCreatePaymentUrl } from '@/config/api';
+import { callCreateBooking, callCreatePaymentUrl, callCheckVoucher } from '@/config/api'; // Thêm callCheckVoucher
 import { ITour } from '@/types/backend';
 import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
@@ -22,6 +22,12 @@ const BookingModal = (props: BookingModalProps) => {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const { t } = useTranslation();
+
+    // --- STATE VOUCHER ---
+    const [voucherCodeInput, setVoucherCodeInput] = useState('');
+    const [appliedVoucher, setAppliedVoucher] = useState<any>(null);
+    const [isCheckingVoucher, setIsCheckingVoucher] = useState(false);
+
     // 1. Lọc các lịch trình hợp lệ
     const activeSchedules = useMemo(() => {
         if (!tourDetail?.tourSchedules) return [];
@@ -41,13 +47,39 @@ const BookingModal = (props: BookingModalProps) => {
 
     const priceAdult = currentSchedule?.priceAdult || 0;
     const priceChild = currentSchedule?.priceChild || 0;
-    const totalPrice = (totalAdults * priceAdult) + (totalChildren * priceChild);
     const remainingSeats = currentSchedule ? (currentSchedule.capacity - currentSchedule.bookedSeats) : 0;
+
+    // --- TÍNH TOÁN TIỀN VÀ KHUYẾN MÃI ---
+    const basePrice = (totalAdults * priceAdult) + (totalChildren * priceChild);
+
+    let discountAmount = 0;
+    if (appliedVoucher) {
+        if (appliedVoucher.discountType === 'PERCENT') {
+            discountAmount = basePrice * (appliedVoucher.discountValue / 100);
+            if (discountAmount > appliedVoucher.maxDiscount) {
+                discountAmount = appliedVoucher.maxDiscount;
+            }
+        } else {
+            discountAmount = appliedVoucher.discountValue;
+        }
+    }
+    const finalPrice = Math.max(0, basePrice - discountAmount);
+
+    // Tự động gỡ voucher nếu giá trị đơn hàng bị giảm xuống dưới mức tối thiểu
+    useEffect(() => {
+        if (appliedVoucher && basePrice < appliedVoucher.minOrderValue) {
+            setAppliedVoucher(null);
+            setVoucherCodeInput('');
+            message.warning('Đơn hàng không còn đủ điều kiện giá trị tối thiểu để áp dụng mã giảm giá này!');
+        }
+    }, [basePrice, appliedVoucher]);
 
     // Reset form
     useEffect(() => {
         if (isModalOpen) {
             form.resetFields();
+            setVoucherCodeInput('');
+            setAppliedVoucher(null);
             if (activeSchedules.length > 0) {
                 form.setFieldsValue({
                     tourScheduleId: activeSchedules[0].id,
@@ -63,7 +95,37 @@ const BookingModal = (props: BookingModalProps) => {
         setIsModalOpen(false);
     };
 
-    // Gọi API Đặt Tour
+    // --- XỬ LÝ VOUCHER ---
+    const handleApplyVoucher = async () => {
+        if (!voucherCodeInput.trim()) {
+            message.warning("Vui lòng nhập mã giảm giá!");
+            return;
+        }
+        setIsCheckingVoucher(true);
+        try {
+            const res = await callCheckVoucher({ code: voucherCodeInput.toUpperCase(), orderTotal: basePrice });
+            if (res && res.data) {
+                setAppliedVoucher(res.data);
+                message.success('Áp dụng mã giảm giá thành công!');
+            } else {
+                message.error(res.message || 'Mã giảm giá không hợp lệ!');
+                setAppliedVoucher(null);
+            }
+        } catch (error: any) {
+            const errorMessage = error?.response?.data?.message || 'Lỗi khi kiểm tra mã giảm giá!';
+            message.error(errorMessage);
+            setAppliedVoucher(null);
+        } finally {
+            setIsCheckingVoucher(false);
+        }
+    };
+
+    const handleRemoveVoucher = () => {
+        setAppliedVoucher(null);
+        setVoucherCodeInput('');
+    };
+
+    // --- GỌI API ĐẶT TOUR ---
     const handleFinish = async (values: any) => {
         setLoading(true);
         try {
@@ -71,18 +133,20 @@ const BookingModal = (props: BookingModalProps) => {
                 tourScheduleId: values.tourScheduleId,
                 totalAdults: values.totalAdults,
                 totalChildren: values.totalChildren,
-                note: values.note || ""
+                note: values.note || "",
+                voucherCode: appliedVoucher ? appliedVoucher.code : null // Truyền mã voucher lên BE
             };
 
             const resBooking = await callCreateBooking(reqData);
 
             if (resBooking && resBooking.data) {
                 const bookingId = resBooking.data.id;
-                const finalPrice = resBooking.data.totalPrice || totalPrice;
+                // Ưu tiên lấy giá trả về từ Backend để tạo thanh toán cho chuẩn xác
+                const paymentTotalPrice = resBooking.data.totalPrice || finalPrice;
 
                 if (values.paymentMethod === 'VNPAY') {
                     message.loading(t('booking.message'), 2);
-                    const paymentReq = { bookingId, totalPrice: finalPrice };
+                    const paymentReq = { bookingId, totalPrice: paymentTotalPrice };
                     const resPayment = await callCreatePaymentUrl(paymentReq);
 
                     if (resPayment?.data?.paymentUrl) {
@@ -107,26 +171,31 @@ const BookingModal = (props: BookingModalProps) => {
         }
     };
 
+    // Format tiền tệ
+    const formatCurrency = (amount: number) => {
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+    };
+
     return (
         <Modal
             title={<Title level={4} style={{ margin: 0, textAlign: 'center' }}>{t('booking.title')}</Title>}
             open={isModalOpen}
             onCancel={handleClose}
             footer={null}
-            width={650}
+            width={700}
             centered
             maskClosable={false}
         >
             <Form form={form} layout="vertical" onFinish={handleFinish} requiredMark={false}>
 
-                {/* 1. THÔNG TIN TOUR (Dùng nền nhạt để tách biệt) */}
+                {/* 1. THÔNG TIN TOUR */}
                 <Card size="small" style={{ backgroundColor: '#f0f2f5', marginBottom: 20, borderRadius: 8, border: 'none' }}>
                     <Text strong style={{ fontSize: 18, color: '#1677ff' }}>{tourDetail?.name}</Text>
                     <br />
                     <Text type="secondary" style={{ fontSize: 13 }}>{t('booking.notice')}</Text>
                 </Card>
 
-                {/* 2. CHỌN NGÀY VÀ SỐ LƯỢNG KẾT HỢP */}
+                {/* 2. CHỌN NGÀY VÀ SỐ LƯỢNG */}
                 <Row gutter={24}>
                     <Col span={24}>
                         <Form.Item
@@ -181,9 +250,37 @@ const BookingModal = (props: BookingModalProps) => {
                     />
                 </Form.Item>
 
+                {/* --- ÁP DỤNG MÃ GIẢM GIÁ --- */}
+                <div style={{ marginBottom: 16 }}>
+                    <Text strong><TagOutlined /> Mã giảm giá / Voucher</Text>
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                        <Input
+                            placeholder="Nhập mã giảm giá (nếu có)..."
+                            value={voucherCodeInput}
+                            onChange={(e) => setVoucherCodeInput(e.target.value.toUpperCase())}
+                            disabled={!!appliedVoucher}
+                            style={{ flex: 1 }}
+                        />
+                        {!appliedVoucher ? (
+                            <Button type="primary" loading={isCheckingVoucher} onClick={handleApplyVoucher}>
+                                Áp dụng
+                            </Button>
+                        ) : (
+                            <Button danger onClick={handleRemoveVoucher}>
+                                Hủy mã
+                            </Button>
+                        )}
+                    </div>
+                    {appliedVoucher && (
+                        <Text type="success" style={{ fontSize: 13, display: 'block', marginTop: 8 }}>
+                            ✅ {appliedVoucher.description || `Đã áp dụng mã ${appliedVoucher.code}`}
+                        </Text>
+                    )}
+                </div>
+
                 <Divider style={{ margin: '16px 0' }} />
 
-                {/* 4. PHƯƠNG THỨC THANH TOÁN (Xếp ngang cho cân đối) */}
+                {/* 4. PHƯƠNG THỨC THANH TOÁN */}
                 <Title level={5} style={{ marginBottom: 12 }}>{t('booking.method')}</Title>
                 <Form.Item name="paymentMethod">
                     <Radio.Group style={{ width: '100%' }}>
@@ -219,12 +316,27 @@ const BookingModal = (props: BookingModalProps) => {
                 {/* 5. TỔNG TIỀN VÀ NÚT CHỐT ĐƠN */}
                 <div style={{ backgroundColor: '#fffbe6', padding: '16px', borderRadius: 8, border: '1px solid #ffe58f', marginTop: 24 }}>
                     <Row align="middle" justify="space-between">
-                        <Col>
-                            <Text type="secondary" style={{ fontSize: 14 }}>{t('booking.total')}</Text>
-                            <br />
-                            <Text strong style={{ fontSize: 26, color: '#cf1322' }}>
-                                {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalPrice)}
-                            </Text>
+                        <Col span={12}>
+                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                {/* Chi tiết giá */}
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                                    <Text type="secondary" style={{ fontSize: 14 }}>Tạm tính:</Text>
+                                    <Text strong>{formatCurrency(basePrice)}</Text>
+                                </div>
+                                {appliedVoucher && (
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, color: '#52c41a' }}>
+                                        <Text style={{ fontSize: 14, color: 'inherit' }}>Giảm giá voucher:</Text>
+                                        <Text strong style={{ color: 'inherit' }}>- {formatCurrency(discountAmount)}</Text>
+                                    </div>
+                                )}
+                                <div style={{ borderTop: '1px solid #ffd591', margin: '4px 0' }}></div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 4 }}>
+                                    <Text type="secondary" style={{ fontSize: 14 }}>{t('booking.total')}:</Text>
+                                    <Text strong style={{ fontSize: 24, color: '#cf1322', lineHeight: 1 }}>
+                                        {formatCurrency(finalPrice)}
+                                    </Text>
+                                </div>
+                            </div>
                         </Col>
                         <Col>
                             <Space>

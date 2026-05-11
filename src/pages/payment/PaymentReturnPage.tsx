@@ -20,7 +20,8 @@ const PaymentReturnPage = () => {
                 const res = await callVerifyVNPay(queryString);
 
                 // vnp_ResponseCode = '00' nghĩa là giao dịch thành công
-                if (searchParams.get('vnp_ResponseCode') === '00' && res?.data?.status === 'SUCCESS') {
+                console.log("Hi hi", res.data);
+                if (searchParams.get('vnp_ResponseCode') === '00' && res?.data?.status === 'PAID') {
                     setStatus('success');
                     setPaymentData(res.data);
                 } else {

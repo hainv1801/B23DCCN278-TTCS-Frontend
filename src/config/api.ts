@@ -265,3 +265,20 @@ export const callCheckCommentEligibility = (tourId: number) => {
 export const callCreateComment = (data: any) => {
     return axios.post('/api/v1/comments', data);
 };
+
+// --- API VOUCHER ---
+export const callFetchVoucher = (query: string) => {
+    return axios.get(`/api/v1/vouchers?${query}`);
+}
+export const callCreateVoucher = (data: any) => {
+    return axios.post('/api/v1/vouchers', data);
+}
+export const callUpdateVoucher = (data: any) => {
+    return axios.put('/api/v1/vouchers', data);
+}
+export const callDeleteVoucher = (id: number) => {
+    return axios.delete(`/api/v1/vouchers/${id}`);
+}
+export const callCheckVoucher = (data: { code: string, orderTotal: number }) => {
+    return axios.post('/api/v1/vouchers/check', data);
+}
