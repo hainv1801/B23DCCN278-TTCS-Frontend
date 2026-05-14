@@ -218,6 +218,7 @@ const UserUpdateInfo = () => {
         // Gộp id của user vào cục data để gửi lên Backend
         const dataUpdate = {
             id: user.id,
+            email: user.email,
             name: values.name,
             age: values.age,
             gender: values.gender,

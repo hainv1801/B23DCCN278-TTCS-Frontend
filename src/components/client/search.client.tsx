@@ -23,10 +23,10 @@ const SearchClient = () => {
 
     useEffect(() => {
         if (location.search) {
-            const queryLocation = searchParams.get("location");
+            const queryDestination = searchParams.get("destination");
             const queryCategories = searchParams.get("categories")
-            if (queryLocation) {
-                form.setFieldValue("location", queryLocation.split(","))
+            if (queryDestination) {
+                form.setFieldValue("location", queryDestination.split(","))
             }
             if (queryCategories) {
                 form.setFieldValue("categories", queryCategories.split(","))
@@ -56,7 +56,7 @@ const SearchClient = () => {
     const onFinish = async (values: any) => {
         let query = "";
         if (values?.location?.length) {
-            query = `location=${values?.location?.join(",")}`;
+            query = `destination=${values?.location?.join(",")}`;
         }
         if (values?.categories?.length) {
             query = values.location?.length ? query + `&categories=${values?.categories?.join(",")}`

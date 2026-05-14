@@ -77,7 +77,7 @@ const ModalUser = (props: IProps) => {
             } else {
                 notification.error({
                     message: 'Có lỗi xảy ra',
-                    description: res.message
+                    description: res.error
                 });
             }
         } else {
@@ -89,7 +89,7 @@ const ModalUser = (props: IProps) => {
             } else {
                 notification.error({
                     message: 'Có lỗi xảy ra',
-                    description: res.message
+                    description: res.error
                 });
             }
         }

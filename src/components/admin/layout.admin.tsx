@@ -98,7 +98,7 @@ const LayoutAdmin = () => {
                     icon: <UserOutlined />
                 }] : []),
                 ...(viewTour || ACL_ENABLE === 'false' ? [{
-                    label: <Link to='/admin/tour'>Tour</Link>,
+                    label: <Link to='/admin/tour'>Tour / Category</Link>,
                     key: '/admin/tour',
                     icon: <ScheduleOutlined />
                 }] : []),
