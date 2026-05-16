@@ -341,11 +341,6 @@ const ManageAccount = (props: IProps) => {
             label: t('account.update'),
             children: <UserUpdateInfo />,
         },
-        {
-            key: 'user-password',
-            label: t('account.password'),
-            children: <p>Tính năng đang phát triển...</p>,
-        },
     ];
 
     return (

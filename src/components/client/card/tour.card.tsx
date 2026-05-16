@@ -1,8 +1,8 @@
 import { callFetchTour } from '@/config/api';
 import { convertSlug } from '@/config/utils';
 import { ITour } from '@/types/backend';
-import { EnvironmentOutlined, ClockCircleOutlined, FireOutlined } from '@ant-design/icons';
-import { Col, Empty, Pagination, Row, Spin } from 'antd';
+import { EnvironmentOutlined, ClockCircleOutlined, FireOutlined, CalendarOutlined } from '@ant-design/icons';
+import { Col, Empty, Pagination, Row, Spin, Tag } from 'antd';
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import styles from 'styles/client.module.scss';
@@ -38,11 +38,9 @@ const TourCard = (props: IProps) => {
     }, [current, pageSize, filter, sortQuery, location]);
 
     const fetchTour = async () => {
-        setIsLoading(true)
+        setIsLoading(true);
         let query = `page=${current}&size=${pageSize}`;
-        if (filter) {
-            query += `&${filter}`;
-        }
+
         if (sortQuery) {
             query += `&${sortQuery}`;
         }
@@ -50,25 +48,32 @@ const TourCard = (props: IProps) => {
         const queryDestination = searchParams.get("destination");
         const queryCategories = searchParams.get("categories");
 
-        if (queryDestination || queryCategories) {
-            let q = "";
-            if (queryDestination) {
-                q = sfIn("destination.id", queryDestination.split(",")).toString();
-            }
+        let filterArray: string[] = [];
 
-            if (queryCategories) {
-                q = queryDestination ?
-                    q + " and " + `${sfIn("categories.id", queryCategories.split(","))}`
-                    : `${sfIn("categories.id", queryCategories.split(","))}`;
-            }
+        // 1. SỬA Ở ĐÂY: Thay "destination.id" thành "destination.location"
+        if (queryDestination) {
+            filterArray.push(sfIn("destination.name", queryDestination.split(",")).toString());
+        }
 
-            query += `&filter=${encodeURIComponent(q)}`;
+        // 2. Categories thì giữ nguyên vì bên SearchClient bạn truyền ID
+        if (queryCategories) {
+            const categoryIds = queryCategories.split(",").map(id => Number(id));
+
+            // Truyền mảng số vào sfIn
+            filterArray.push(sfIn("categories.id", categoryIds).toString());
+        }
+
+        // Gộp tất cả các filter lại bằng chữ 'and'
+        if (filterArray.length > 0) {
+            const finalFilter = filterArray.join(" and ");
+            // Encode URI để các ký tự đặc biệt (dấu cách, dấu phẩy) không làm gãy URL
+            query += `&filter=${encodeURIComponent(finalFilter)}`;
         }
 
         const res = await callFetchTour(query);
         if (res && res.data) {
             setDisplayTour(res.data.result);
-            setTotal(res.data.meta.total)
+            setTotal(res.data.meta.total);
         }
         setIsLoading(false);
     }
@@ -94,7 +99,6 @@ const TourCard = (props: IProps) => {
                 <Row gutter={[24, 24]}>
                     <Col span={24}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                            {/* Áp dụng class section-heading cho tiêu đề */}
                             <h2 className={styles["section-heading"]}>{t('tour.title')}</h2>
 
                             {!showPagination &&
@@ -106,13 +110,18 @@ const TourCard = (props: IProps) => {
                     </Col>
 
                     {displayTour?.map(item => {
+                        // 1. Logic lọc các lịch trình đang mở và chưa khởi hành
+                        const upcomingSchedules = item.tourSchedules
+                            ?.filter(s => s.status === 'OPEN' && dayjs(s.departureDate).isAfter(dayjs(), 'day'))
+                            ?.sort((a, b) => dayjs(a.departureDate).diff(dayjs(b.departureDate)))
+                            ?.slice(0, 3); // Lấy tối đa 3 ngày gần nhất để UI không bị tràn
+
                         return (
                             <Col span={24} md={12} lg={8} key={item.id}>
                                 <div
                                     className={styles['tour-card']}
                                     onClick={() => handleViewDetailTour(item)}
                                 >
-                                    {/* 1. Phần hình ảnh */}
                                     <div className={styles['tour-image']}>
                                         <img
                                             alt={item.name}
@@ -121,13 +130,11 @@ const TourCard = (props: IProps) => {
                                                 e.currentTarget.src = '/fallback-image.jpg';
                                             }}
                                         />
-                                        {/* Tag HOT nổi bật góc phải */}
                                         <span className={styles['tour-badge']}>
                                             <FireOutlined /> HOT
                                         </span>
                                     </div>
 
-                                    {/* 2. Phần nội dung */}
                                     <div className={styles['tour-content']}>
                                         <h3 className={styles['tour-title']}>{item.name}</h3>
 
@@ -141,13 +148,29 @@ const TourCard = (props: IProps) => {
                                             <span>{item.duration} Ngày</span>
                                         </div>
 
-                                        {/* 3. Phần Footer (Giá tiền và Thời gian cập nhật) */}
+                                        {/* 2. Hiển thị Lịch khởi hành */}
+                                        <div className={styles['tour-info']} style={{ marginTop: '8px', alignItems: 'flex-start' }}>
+                                            <CalendarOutlined style={{ color: '#faad14', marginTop: '4px' }} />
+                                            <div style={{ marginLeft: 6, display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                                                {upcomingSchedules && upcomingSchedules.length > 0 ? (
+                                                    upcomingSchedules.map((schedule, idx) => (
+                                                        <Tag color="processing" key={idx} style={{ margin: 0 }}>
+                                                            {dayjs(schedule.departureDate).format('DD/MM')}
+                                                        </Tag>
+                                                    ))
+                                                ) : (
+                                                    <span style={{ color: '#888', fontSize: '13px' }}>Đang cập nhật lịch</span>
+                                                )}
+                                            </div>
+                                        </div>
+
                                         <div className={styles['tour-footer']}>
                                             <span className={styles['tour-price']}>
                                                 {(item.basePrice + "")?.replace(/\B(?=(\d{3})+(?!\d))/g, ',')} đ
                                             </span>
                                             <span style={{ color: '#888', fontSize: '13px' }}>
-                                                {item.updatedAt ? dayjs(item.updatedAt).locale('vi').fromNow() : dayjs(item.createdAt).locale('vi').fromNow()}
+                                                {item.updatedAt ?
+                                                    dayjs(item.updatedAt).locale('vi').fromNow() : dayjs(item.createdAt).locale('vi').fromNow()}
                                             </span>
                                         </div>
                                     </div>
@@ -156,8 +179,7 @@ const TourCard = (props: IProps) => {
                         )
                     })}
 
-                    {(!displayTour || displayTour && displayTour.length === 0)
-                        && !isLoading &&
+                    {(!displayTour || displayTour && displayTour.length === 0) && !isLoading &&
                         <Col span={24}>
                             <div className={styles["empty"]}>
                                 <Empty description={t('tour.empty')} />

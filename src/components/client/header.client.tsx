@@ -79,7 +79,7 @@ const Header = (props: any) => {
             key: 'manage-account',
             icon: <ContactsOutlined />
         },
-        ...(user.role?.permissions?.length ? [{
+        ...(user.role?.permissions?.length && user.role?.name != 'Customer' ? [{
             label: <Link to={"/admin"}>{t('header.admin')}</Link>,
             key: 'admin',
             icon: <FireOutlined />

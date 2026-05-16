@@ -21,6 +21,8 @@
     "title": "Confirm booking",
     "notice": "Please select the correct schedule and complete the booking information below.",
     "departureTime": "DepartureTime",
+    "returnTime": "ReturnTime",
+    "price": "Base price",
     "timeMessage": "Select the schedule you want",
     "available": "Available",
     "slot": "slots",
@@ -34,7 +36,12 @@
     "cashNote": "Post-payment with staff",
     "total": "Total: ",
     "cancel": "Cancel",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "voucher": "Voucher",
+    "voucherMessage": "Enter voucher code (Optional)",
+    "apply": "Apply",
+    "subtotal": "Subtotal", 
+    "discount": "Discount"
   },
   "search": {
     "heading": "The most VIP tours on Earth",
@@ -64,7 +71,8 @@
     "tax": "Includes port fees and tax",
     "confirm": "Confirm immediately",
     "support": "Support 24/7",
-    "payment": "Safe and secure payment"
+    "payment": "Safe and secure payment",
+    "description": "Description"
   },
   "account":{
     "history": "Booking History",

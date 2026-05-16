@@ -282,3 +282,10 @@ export const callDeleteVoucher = (id: number) => {
 export const callCheckVoucher = (data: { code: string, orderTotal: number }) => {
     return axios.post('/api/v1/vouchers/check', data);
 }
+
+export const callFetchDashboardStats = () => {
+    return axios.get('/api/v1/dashboard/stats');
+}
+export const callFetchRevenueChart = () => {
+    return axios.get('/api/v1/dashboard/revenue-chart');
+}

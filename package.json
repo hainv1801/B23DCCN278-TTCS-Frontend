@@ -36,6 +36,7 @@
     "react-redux": "8.0.5",
     "react-router-dom": "6.11.2",
     "react-spinners": "0.13.8",
+    "recharts": "^3.8.1",
     "spring-filter-query-builder": "1.1.0",
     "uuid": "9.0.0"
   },

@@ -21,6 +21,8 @@
     "title": "Xác nhận đặt tour",
     "notice": "Vui lòng chọn đúng lịch trình và hoàn tất thông tin đặt chỗ phía dưới.",
     "departureTime": "Ngày khởi hành",
+    "returnTime": "Ngày về",
+    "price": "Giá vé chỉ từ",
     "timeMessage": "Chọn ngày bạn muốn đi",
     "available": "Còn trống",
     "slot": "chỗ",
@@ -34,7 +36,12 @@
     "cashNote": "Thanh toán sau với nhân viên",
     "total": "Tổng thanh toán :",
     "cancel": "Hủy",
-    "confirm": "Xác nhận đặt tour"
+    "confirm": "Xác nhận đặt tour",
+    "voucher": "Mã giảm giá",
+    "voucherMessage": "Nhập mã giảm giá (nếu có)",
+    "apply": "Áp dụng",
+    "subtotal": "Tạm tính", 
+    "discount": "Giảm giá"
   },
   "search": {
     "heading": "Tour du lịch vip nhất quả đất",
@@ -58,13 +65,14 @@
     "destination": "Điểm đến",
     "transportation": "Phương tiện",
     "car": "Xe du lịch cao cấp", 
-    "program": "Lịch trình", 
+    "program": "Lịch trình khởi hành", 
     "startingPrice": "Giá tham khảo chỉ từ",
     "booking": "Đặt tour ngay!!!",
     "tax": "Đã bao gồm thuế và phí",
     "confirm": "Xác nhận ngay lập tức",
     "support": "Hỗ trợ 24/7",
-    "payment": "Thanh toán an toàn, bảo mật"
+    "payment": "Thanh toán an toàn, bảo mật",
+    "description": "Mô tả"
   },
   "account":{
     "history": "Lịch sử đặt tour",

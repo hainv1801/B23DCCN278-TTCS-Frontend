@@ -17,13 +17,13 @@ const ModalCategory = (props: IProps) => {
     const [form] = Form.useForm();
 
     const submitCategory = async (valuesForm: any) => {
-        const { name } = valuesForm;
+        const { name, nameEN } = valuesForm;
 
         if (dataInit?.id) {
             // Cập nhật (Update)
             // Lưu ý: Hãy chắc chắn hàm callUpdateCategory trong api.ts của bạn đang nhận 2 tham số là (id, name)
             // hoặc nhận 1 object { id, name } tùy theo cách bạn đã viết. Dưới đây là cách gọi truyền 1 object:
-            const res = await callUpdateCategory({ id: dataInit.id, name } as any);
+            const res = await callUpdateCategory({ id: dataInit.id, name, nameEN } as any);
 
             if (res.data) {
                 message.success("Cập nhật loại tour thành công");
@@ -37,7 +37,7 @@ const ModalCategory = (props: IProps) => {
             }
         } else {
             // Tạo mới (Create)
-            const res = await callCreateCategory({ name } as any);
+            const res = await callCreateCategory({ name, nameEN } as any);
 
             if (res.data) {
                 message.success("Thêm mới loại tour thành công");
@@ -82,13 +82,20 @@ const ModalCategory = (props: IProps) => {
                 <Row gutter={16}>
                     <Col span={24}>
                         <ProFormText
-                            label="Tên loại tour"
+                            label="Tên loại tour (Tiếng Việt)"
                             name="name"
                             rules={[{ required: true, message: 'Vui lòng không bỏ trống' }]}
                             placeholder="Nhập tên loại tour (VD: Du lịch sinh thái, Khám phá, Nghỉ dưỡng...)"
                         />
                     </Col>
                 </Row>
+                <Col span={24}>
+                    <ProFormText
+                        label="Tên loại tour (Tiếng Anh)"
+                        name="nameEn"
+                        placeholder="Nhập tên loại tour bằng tiếng Anh (VD: Ecotourism, Discovery...)"
+                    />
+                </Col>
             </ModalForm>
         </>
     )

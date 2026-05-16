@@ -1,9 +1,9 @@
 import SearchClient from '@/components/client/search.client';
 import { Col, Divider, Row } from 'antd';
 import styles from 'styles/client.module.scss';
-import JobCard from '@/components/client/card/tour.card';
+import TourCard from '@/components/client/card/tour.card';
 
-const ClientJobPage = (props: any) => {
+const ClientTourPage = (props: any) => {
     return (
         <div className={styles["container"]} style={{ marginTop: 20 }}>
             <Row gutter={[20, 20]}>
@@ -13,7 +13,7 @@ const ClientJobPage = (props: any) => {
                 <Divider />
 
                 <Col span={24}>
-                    <JobCard
+                    <TourCard
                         showPagination={true}
                     />
                 </Col>
@@ -22,4 +22,4 @@ const ClientJobPage = (props: any) => {
     )
 }
 
-export default ClientJobPage;
+export default ClientTourPage;

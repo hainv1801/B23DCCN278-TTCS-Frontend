@@ -106,6 +106,7 @@ export interface IDestination {
 export interface ICategory {
     id?: number;
     name: string;
+    nameEN?: string;
     createdAt?: string;
     updatedAt?: string;
     createdBy?: string;
@@ -118,7 +119,8 @@ export interface ITour {
     basePrice: number;
     duration: number;
     description: string;
-    destination?: IDestination
+    descriptionEN?: string;
+    destination?: IDestination;
     categories?: ICategory[];
     tourSchedules?: ITourSchedule[];
     createdAt?: string;

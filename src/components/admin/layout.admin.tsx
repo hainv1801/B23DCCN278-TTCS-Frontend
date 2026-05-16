@@ -41,7 +41,6 @@ const LayoutAdmin = () => {
     useEffect(() => {
         const ACL_ENABLE = import.meta.env.VITE_ACL_ENABLE;
         const userRoleName = user?.role?.name;
-        console.log(user);
         if (permissions?.length || ACL_ENABLE === 'false') {
 
             const viewDestination = permissions?.find(item =>
@@ -82,10 +81,15 @@ const LayoutAdmin = () => {
             )
             const full = [
                 {
-                    label: <Link to='/admin'>Dashboard</Link>,
+                    label: <Link to='/admin'>Welcome</Link>,
                     key: '/admin',
                     icon: <AppstoreOutlined />
                 },
+                ...(userRoleName === 'ADMIN' || ACL_ENABLE === 'false' ? [{
+                    label: <Link to='/admin/dashboard'>Dashboard</Link>,
+                    key: '/admin/dashboard',
+                    icon: <CalendarOutlined />
+                }] : []),
                 ...(viewDestination || ACL_ENABLE === 'false' ? [{
                     label: <Link to='/admin/destination'>Destination</Link>,
                     key: '/admin/destination',
@@ -153,16 +157,6 @@ const LayoutAdmin = () => {
         }
     }
 
-    // if (isMobile) {
-    //     items.push({
-    //         label: <label
-    //             style={{ cursor: 'pointer' }}
-    //             onClick={() => handleLogout()}
-    //         >Đăng xuất</label>,
-    //         key: 'logout',
-    //         icon: <LogoutOutlined />
-    //     })
-    // }
 
     const itemsDropdown = [
         {
@@ -235,9 +229,7 @@ const LayoutAdmin = () => {
                     <Content style={{ padding: '15px' }}>
                         <Outlet />
                     </Content>
-                    {/* <Footer style={{ padding: 10, textAlign: 'center' }}>
-                        React Typescript series Nest.JS &copy; Hỏi Dân IT - Made with <HeartTwoTone />
-                    </Footer> */}
+
                 </Layout>
             </Layout>
 

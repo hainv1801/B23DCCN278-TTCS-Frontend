@@ -16,7 +16,6 @@ import Header from 'components/client/header.client';
 import Footer from 'components/client/footer.client';
 import HomePage from 'pages/home';
 import styles from 'styles/app.module.scss';
-import DashboardPage from './pages/admin/dashboard';
 import DestinationPage from './pages/admin/destination';
 import PermissionPage from './pages/admin/permission';
 import BookingPage from './pages/admin/booking';
@@ -36,6 +35,8 @@ import ViewUpsertTourSchedule from './components/admin/tour/upsert.tour.schedule
 import MyTasksPage from './pages/admin/MyTasksPage';
 import TourSchedulePage from './pages/admin/tourschedule';
 import VoucherPage from './pages/admin/voucher';
+import AdminDashboard from './pages/admin/dashboard';
+import WelcomeAdminPage from './pages/admin/welcome';
 const LayoutClient = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const location = useLocation();
@@ -96,7 +97,14 @@ export default function App() {
         {
           index: true, element:
             <ProtectedRoute>
-              <DashboardPage />
+              <WelcomeAdminPage />
+            </ProtectedRoute>
+        },
+        {
+          path: "dashboard",
+          element:
+            <ProtectedRoute>
+              <AdminDashboard />
             </ProtectedRoute>
         },
         {

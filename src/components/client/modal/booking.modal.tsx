@@ -127,6 +127,7 @@ const BookingModal = (props: BookingModalProps) => {
 
     // --- GỌI API ĐẶT TOUR ---
     const handleFinish = async (values: any) => {
+        console.log(values);
         setLoading(true);
         try {
             const reqData = {
@@ -134,6 +135,7 @@ const BookingModal = (props: BookingModalProps) => {
                 totalAdults: values.totalAdults,
                 totalChildren: values.totalChildren,
                 note: values.note || "",
+                paymentMethod: values.paymentMethod,
                 voucherCode: appliedVoucher ? appliedVoucher.code : null // Truyền mã voucher lên BE
             };
 
@@ -252,10 +254,10 @@ const BookingModal = (props: BookingModalProps) => {
 
                 {/* --- ÁP DỤNG MÃ GIẢM GIÁ --- */}
                 <div style={{ marginBottom: 16 }}>
-                    <Text strong><TagOutlined /> Mã giảm giá / Voucher</Text>
+                    <Text strong><TagOutlined />{t('booking.voucher')}</Text>
                     <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
                         <Input
-                            placeholder="Nhập mã giảm giá (nếu có)..."
+                            placeholder={t('booking.voucherMessage')}
                             value={voucherCodeInput}
                             onChange={(e) => setVoucherCodeInput(e.target.value.toUpperCase())}
                             disabled={!!appliedVoucher}
@@ -263,11 +265,11 @@ const BookingModal = (props: BookingModalProps) => {
                         />
                         {!appliedVoucher ? (
                             <Button type="primary" loading={isCheckingVoucher} onClick={handleApplyVoucher}>
-                                Áp dụng
+                                {t('booking.apply')}
                             </Button>
                         ) : (
                             <Button danger onClick={handleRemoveVoucher}>
-                                Hủy mã
+                                {t('booking.cancel')}
                             </Button>
                         )}
                     </div>
@@ -320,12 +322,12 @@ const BookingModal = (props: BookingModalProps) => {
                             <div style={{ display: 'flex', flexDirection: 'column' }}>
                                 {/* Chi tiết giá */}
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                                    <Text type="secondary" style={{ fontSize: 14 }}>Tạm tính:</Text>
+                                    <Text type="secondary" style={{ fontSize: 14 }}>{t('booking.subtotal')}:</Text>
                                     <Text strong>{formatCurrency(basePrice)}</Text>
                                 </div>
                                 {appliedVoucher && (
                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, color: '#52c41a' }}>
-                                        <Text style={{ fontSize: 14, color: 'inherit' }}>Giảm giá voucher:</Text>
+                                        <Text style={{ fontSize: 14, color: 'inherit' }}>{t('booking.discount')}</Text>
                                         <Text strong style={{ color: 'inherit' }}>- {formatCurrency(discountAmount)}</Text>
                                     </div>
                                 )}

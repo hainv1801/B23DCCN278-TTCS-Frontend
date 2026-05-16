@@ -30,7 +30,7 @@ const ViewUpsertTour = (props: any) => {
 
     const navigate = useNavigate();
     const [descriptionValue, setDescriptionValue] = useState<string>("");
-
+    const [descriptionEnValue, setDescriptionEnValue] = useState<string>("");
     let location = useLocation();
     let params = new URLSearchParams(location.search);
     const id = params?.get("id"); // tour id
@@ -49,7 +49,7 @@ const ViewUpsertTour = (props: any) => {
                 if (res && res.data) {
                     setDataUpdate(res.data);
                     setDescriptionValue(res.data.description);
-
+                    setDescriptionEnValue(res.data.descriptionEN || "");
                     // Khởi tạo giá trị Điểm đến cho dropdown DebounceSelect
                     if (res.data.destination) {
                         setDestinations([{
@@ -60,14 +60,10 @@ const ViewUpsertTour = (props: any) => {
                     }
 
                     // Khởi tạo giá trị Các loại tour
-                    const selectedCategories = res.data?.categories?.map((item: ICategory) => {
-                        return {
-                            label: item.name,
-                            value: item.id?.toString(),
-                            key: item.id?.toString()
-                        }
-                    });
-
+                    const selectedCategories = res.data.categories
+                        ? res.data.categories.map((item: any) => item.id?.toString())
+                        : [];
+                    console.log("Tour", res);
                     // Đổ dữ liệu vào Form
                     form.setFieldsValue({
                         ...res.data,
@@ -122,11 +118,12 @@ const ViewUpsertTour = (props: any) => {
             basePrice: values.basePrice,
             duration: values.duration,
             description: descriptionValue,
+            descriptionEN: descriptionEnValue,
             categories: arrCategories,
             destination: values.destination ? { id: +(values.destination.value) } as any : undefined,
             // active: values.active // Bỏ comment nếu Backend của bạn có trường trạng thái active
         };
-
+        console.log(tourPayload);
         if (dataUpdate?.id) {
             // Cập nhật (Update)
             tourPayload.id = dataUpdate.id; // Gắn ID vào payload
@@ -194,15 +191,15 @@ const ViewUpsertTour = (props: any) => {
                                     <DebounceSelect
                                         allowClear
                                         showSearch
-                                        defaultValue={destinations}
-                                        value={destinations}
+                                        // defaultValue={destinations}
+                                        // value={destinations}
                                         placeholder="Gõ để tìm kiếm điểm đến..."
                                         fetchOptions={fetchDestinationList}
-                                        onChange={(newValue: any) => {
-                                            if (newValue?.length === 0 || newValue?.length === 1) {
-                                                setDestinations(newValue as IDestinationSelect[]);
-                                            }
-                                        }}
+                                        // onChange={(newValue: any) => {
+                                        //     if (newValue?.length === 0 || newValue?.length === 1) {
+                                        //         setDestinations(newValue as IDestinationSelect[]);
+                                        //     }
+                                        // }}
                                         style={{ width: '100%' }}
                                     />
                                 </ProForm.Item>
@@ -246,27 +243,34 @@ const ViewUpsertTour = (props: any) => {
                                 />
                             </Col>
 
-                            {/* Bỏ comment đoạn này nếu bảng Tour của bạn có trường trạng thái active/inactive */}
-                            {/* <Col span={24} md={24}>
-                                <ProFormSwitch
-                                    label="Trạng thái hiển thị"
-                                    name="active"
-                                    checkedChildren="ĐANG MỞ"
-                                    unCheckedChildren="ĐÓNG"
-                                    initialValue={true}
-                                />
-                            </Col> */}
 
-                            <Col span={24}>
+
+                            {/* MÔ TẢ TIẾNG VIỆT */}
+                            <Col span={24} md={12}>
                                 <ProForm.Item
-                                    name="description"
-                                    label="Chương trình Tour / Mô tả chi tiết"
+                                    // name="description"
+                                    label="Chương trình Tour / Mô tả (Tiếng Việt)"
                                     rules={[{ required: true, message: 'Vui lòng nhập chương trình tour!' }]}
                                 >
                                     <ReactQuill
                                         theme="snow"
                                         value={descriptionValue}
                                         onChange={setDescriptionValue}
+                                    />
+                                </ProForm.Item>
+                            </Col>
+
+                            {/* BỔ SUNG MÔ TẢ TIẾNG ANH */}
+                            <Col span={24} md={12}>
+                                <ProForm.Item
+                                    // name="descriptionEn"
+                                    label="Chương trình Tour / Mô tả (Tiếng Anh)"
+                                >
+                                    <ReactQuill
+                                        theme="snow"
+                                        value={descriptionEnValue}
+                                        onChange={setDescriptionEnValue}
+                                        placeholder="Enter tour description in English"
                                     />
                                 </ProForm.Item>
                             </Col>
