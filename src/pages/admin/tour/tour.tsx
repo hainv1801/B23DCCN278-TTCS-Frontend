@@ -3,7 +3,7 @@ import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { ITour } from "@/types/backend";
 import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import { ActionType, ProColumns } from '@ant-design/pro-components';
-import { Button, Popconfirm, Space, message, notification } from "antd";
+import { Button, Popconfirm, Space, message, notification, Tooltip } from "antd";
 import { useRef } from 'react';
 import dayjs from 'dayjs';
 import { callDeleteTour } from "@/config/api";
@@ -58,8 +58,26 @@ const TourPage = () => {
         },
         {
             title: 'Tên Tour',
-            dataIndex: 'name',
-            sorter: true,
+            dataIndex: 'name', // Đổi dataIndex thành 'name' cho đúng với entity Tour
+            key: 'name',
+            width: 300, // Chiều rộng của cột
+            render: (_dom: any, entity: any) => {
+                // Lấy tên tour từ entity
+                const tourName = entity?.name || "Đang cập nhật...";
+
+                return (
+                    <Tooltip title={tourName} placement="topLeft">
+                        <div style={{
+                            width: 270, // Cố định cứng chiều rộng thẻ div (nhỏ hơn width của cột)
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                        }}>
+                            {tourName}
+                        </div>
+                    </Tooltip>
+                );
+            }
         },
         {
             title: 'Điểm đến',

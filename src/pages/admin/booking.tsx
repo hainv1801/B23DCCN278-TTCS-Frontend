@@ -2,7 +2,7 @@ import DataTable from "@/components/client/data-table";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { IBooking } from "@/types/backend";
 import { ActionType, ProColumns, ProFormSelect } from '@ant-design/pro-components';
-import { Space, Tag, message, notification } from "antd";
+import { Space, Tag, message, notification, Tooltip } from "antd";
 import { useState, useRef } from 'react';
 import dayjs from 'dayjs';
 import { callDeleteBooking } from "@/config/api";
@@ -71,9 +71,24 @@ const BookingPage = () => {
         },
         {
             title: 'Tên Tour',
-            dataIndex: ["schedule", "tourName"],
-            hideInSearch: true,
-            ellipsis: true, // Thêm ellipsis để cắt chữ nếu tên tour quá dài
+            dataIndex: ['schedule', 'tourName'],
+            key: 'tourName',
+            width: 300, // Chiều rộng của cột
+            render: (_dom: any, entity: any) => {
+                const tourName = entity?.schedule?.tourName || "Đang cập nhật...";
+                return (
+                    <Tooltip title={tourName} placement="topLeft">
+                        <div style={{
+                            width: 270, // <--- CỐ ĐỊNH CỨNG CHIỀU RỘNG TẠI ĐÂY (Nên nhỏ hơn width cột tầm 20-30px)
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                        }}>
+                            {tourName}
+                        </div>
+                    </Tooltip>
+                );
+            }
         },
         {
             title: 'Tổng tiền',

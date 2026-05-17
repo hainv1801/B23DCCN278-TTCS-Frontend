@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Table, Tag, Typography, Space, Button, Drawer, Modal, Form, Select, message, notification } from 'antd';
+import { Table, Tag, Typography, Space, Button, Drawer, Modal, Form, Select, message, notification, Tooltip } from 'antd';
 import { callFetchMyTasks, callFetchBooking, callUpdateTourSchedule } from '@/config/api';
 import dayjs from 'dayjs';
 import { TeamOutlined, EditOutlined } from '@ant-design/icons';
@@ -107,7 +107,22 @@ const MyTasksPage = () => {
             title: 'Tên Tour',
             dataIndex: ['tourInfo', 'name'],
             key: 'tourName',
-            render: (text: string) => <strong>{text}</strong>
+            width: 300, // Chiều rộng của cột
+            render: (_dom: any, entity: any) => {
+                const tourName = entity?.tourInfo?.name || "Đang cập nhật...";
+                return (
+                    <Tooltip title={tourName} placement="topLeft">
+                        <div style={{
+                            width: 270, // <--- CỐ ĐỊNH CỨNG CHIỀU RỘNG TẠI ĐÂY (Nên nhỏ hơn width cột tầm 20-30px)
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                        }}>
+                            {tourName}
+                        </div>
+                    </Tooltip>
+                );
+            }
         },
         {
             title: 'Ngày khởi hành',

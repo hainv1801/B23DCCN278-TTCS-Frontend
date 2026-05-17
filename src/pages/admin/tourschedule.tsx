@@ -3,7 +3,7 @@ import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { ITourSchedule } from "@/types/backend";
 import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import { ActionType, ProColumns, ProFormSelect } from '@ant-design/pro-components';
-import { Button, Popconfirm, Space, Tag, message, notification } from "antd";
+import { Button, Popconfirm, Space, Tag, message, notification, Tooltip } from "antd";
 import { useRef } from 'react';
 import dayjs from 'dayjs';
 import { callDeleteTourSchedule } from "@/config/api";
@@ -60,16 +60,24 @@ const TourSchedulePage = () => {
         },
         {
             title: 'Tên Tour',
-            dataIndex: 'tourInfo',
-            render: (text, record) => {
+            dataIndex: ['tourInfo', 'name'],
+            key: 'tourName',
+            width: 300, // Chiều rộng của cột
+            render: (_dom: any, entity: any) => {
+                const tourName = entity?.tourInfo?.name || "Đang cập nhật...";
                 return (
-                    <strong style={{ color: '#333' }}>
-                        {record?.tourInfo?.name || 'N/A'}
-                    </strong>
+                    <Tooltip title={tourName} placement="topLeft">
+                        <div style={{
+                            width: 270, // <--- CỐ ĐỊNH CỨNG CHIỀU RỘNG TẠI ĐÂY (Nên nhỏ hơn width cột tầm 20-30px)
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                        }}>
+                            {tourName}
+                        </div>
+                    </Tooltip>
                 );
-            },
-            hideInSearch: true,
-            ellipsis: true,
+            }
         },
         {
             title: 'Hướng dẫn viên',

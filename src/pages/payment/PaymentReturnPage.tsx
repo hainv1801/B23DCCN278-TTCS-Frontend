@@ -42,7 +42,7 @@ const PaymentReturnPage = () => {
             </div>
         );
     }
-
+    console.log("Data", paymentData);
     return (
         <div style={{ minHeight: '80vh', display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: '#f0f2f5', padding: 20 }}>
             <Card style={{ width: '100%', maxWidth: 600, borderRadius: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>

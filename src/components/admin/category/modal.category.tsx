@@ -38,7 +38,7 @@ const ModalCategory = (props: IProps) => {
         } else {
             // Tạo mới (Create)
             const res = await callCreateCategory({ name, nameEN } as any);
-
+            console.log(res);
             if (res.data) {
                 message.success("Thêm mới loại tour thành công");
                 handleReset();
@@ -92,7 +92,7 @@ const ModalCategory = (props: IProps) => {
                 <Col span={24}>
                     <ProFormText
                         label="Tên loại tour (Tiếng Anh)"
-                        name="nameEn"
+                        name="nameEN"
                         placeholder="Nhập tên loại tour bằng tiếng Anh (VD: Ecotourism, Discovery...)"
                     />
                 </Col>
